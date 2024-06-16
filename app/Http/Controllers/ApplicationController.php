@@ -132,7 +132,8 @@ class ApplicationController extends Controller
                         'training_cert' => optional($applicant->user->requirement)->training_cert,
                         'eligibility' => optional($applicant->user->requirement)->eligibility,
                         'job_type' => optional($applicant->hiring)->job_type,
-                        'dependability' => $applicant->SalaryGrade->dependability,
+                        'selection_id' => $applicant->SalaryGrade->selection_board_id,
+                        'applicantId' => $applicant->SalaryGrade->applicant_id, 
                     ];
                 });
             } else {
@@ -343,15 +344,15 @@ class ApplicationController extends Controller
     
     public function IndividualBEI(Request $request){
         $applicantID = $request->ApplicantID;
-        $fetchInfo = Applicant::with(['user', 'hiring'])
+        $fetchInfo = Applicant::with(['user', 'hiring', 'SalaryGrade'])
         ->where('id', $applicantID)
         ->first();
         $competenciesSG1to6 = [
-            ['name' => 'DEPENDABILITY', 'labelDB' => 'dependability'],
-            ['name' => 'CREATIVE & INNOVATIVE THINKING', 'labelDB' => 'creative'],
-            ['name' => 'INITIATIVE', 'labelDB' => 'initiative'],
-            ['name' => 'TIME MANAGEMENT', 'labelDB' => 'time_management'],
-            ['name' => 'PLANNING & ORGANIZING', 'labelDB' => 'planning']
+                ['name' => 'DEPENDABILITY', 'labelDB' => 'dependability'],
+                ['name' => 'CREATIVE & INNOVATIVE THINKING', 'labelDB' => 'creative'],
+                ['name' => 'INITIATIVE', 'labelDB' => 'initiative'],
+                ['name' => 'TIME MANAGEMENT', 'labelDB' => 'time_management'],
+                ['name' => 'PLANNING & ORGANIZING', 'labelDB' => 'planning']
             ];
         
             $competenciesSG9to16 = [
@@ -387,7 +388,7 @@ class ApplicationController extends Controller
                 ['name' => 'MANAGING PERFORMANCE AND COACHING FOR RESULTS', 'labelDB' => 'coaching'],
                 ['name' => 'CREATING & NURTURING A HIGH PERFORMING ORGANISATION', 'labelDB' => 'creating_nurture_performance']
             ];
-
+            
         $data = [
             'salaryGrade' => $fetchInfo->hiring->salary_grade,
             'jobTitle' => $fetchInfo->hiring->job_position,
@@ -410,44 +411,51 @@ class ApplicationController extends Controller
     public function UploadBEI(Request $request){
         $applicantID = $request->applicationID;
         $salaryGrade = $request->salaryGrade;
-        $rate = $request->creative_rate .',' . $request->creative_situation .',' . $request->creative_action .',' . $request->creative_result;
-        dd($rate);
         if($salaryGrade >= 1 && $salaryGrade <= 8){
-            $competencies = ['dependability','creative', 'initiative',
-                'time_management', 'planning'];
-            foreach($competencies as $competency) {
-                echo $competency;
-                // Build the string using values from the request
-                $competency =   $request->{$competency . '_rate'} . ',' . 
-                                $request->{$competency . '_situation'} . ',' . 
-                                $request->{$competency . '_action'} . ',' . 
-                                $request->{$competency . '_result'};
-            }
+            $data = [
+                'dependability' => $request->dependability_rate.','. $request->dependability_situation. ','. $request->dependability_action. ','. $request->dependability_result,
+                'creative' => $request->creative_rate.','. $request->creative_situation. ','. $request->creative_action. ','. $request->creative_result,
+                'initiative' => $request->initiative_rate.','. $request->initiative_situation. ','. $request->initiative_action. ','. $request->initiative_result,
+                'time_management' => $request->time_management_rate.','. $request->time_management_situation. ','. $request->time_management_action. ','. $request->time_management_result,
+                'planning' => $request->planning_rate.','. $request->planning_situation. ','. $request->planning_action. ','. $request->planning_result,
+            ];
+        } elseif($salaryGrade >= 9 && $salaryGrade <= 17){
+            $data = [
+                'dependability' => $request->dependability_rate.','. $request->dependability_situation. ','. $request->dependability_action. ','. $request->dependability_result,
+                'creative' => $request->creative_rate.','. $request->creative_situation. ','. $request->creative_action. ','. $request->creative_result,
+                'adaptability' => $request->adaptability_rate.','. $request->adaptability_situation. ','. $request->adaptability_action. ','. $request->adaptability_result,
+                'teamwork' => $request->teamwork_rate.','. $request->teamwork_situation. ','. $request->teamwork_action. ','. $request->teamwork_result,
+                'self_management' => $request->self_management_rate.','. $request->self_management_situation. ','. $request->self_management_action. ','. $request->self_management_result,
+                'org_awareness' => $request->org_awareness_rate.','. $request->org_awareness_situation. ','. $request->org_awareness_action. ','. $request->org_awareness_result,
+                'communication' => $request->communication_rate.','. $request->communication_situation. ','. $request->communication_action. ','. $request->communication_result,
+                'initiative' => $request->initiative_rate.','. $request->initiative_situation. ','. $request->initiative_action. ','. $request->initiative_result,
+                'service_delivery' => $request->service_delivery_rate.','. $request->service_delivery_situation. ','. $request->service_delivery_action. ','. $request->service_delivery_result,
+                'customer_focus' => $request->customer_focus_rate.','. $request->customer_focus_situation. ','. $request->customer_focus_action. ','. $request->customer_focus_result,
+            ];
+        } elseif($salaryGrade >= 18 && $salaryGrade <= 24){
+            $data = [
+                'creative' => $request->creative_rate.','. $request->creative_situation. ','. $request->creative_action. ','. $request->creative_result,
+                'teamwork' => $request->teamwork_rate.','. $request->teamwork_situation. ','. $request->teamwork_action. ','. $request->teamwork_result,
+                'self_management' => $request->self_management_rate.','. $request->self_management_situation. ','. $request->self_management_action. ','. $request->self_management_result,
+                'management' => $request->management_rate.','. $request->management_situation. ','. $request->management_action. ','. $request->management_result,
+                'staff_management' => $request->staff_management_rate.','. $request->staff_management_situation. ','. $request->staff_management_action. ','. $request->staff_management_result,
+                'org_wareness' => $request->org_awareness_rate.','. $request->org_awareness_situation. ','. $request->org_awareness_action. ','. $request->org_awareness_result,
+                'stategic_planning' => $request->stategic_planning_rate.','. $request->stategic_planning_situation. ','. $request->stategic_planning_action. ','. $request->stategic_planning_result,
+                'monitor_evaluation' => $request->monitor_evaluation_rate.','. $request->monitor_evaluation_situation. ','. $request->monitor_evaluation_action. ','. $request->monitor_evaluation_result,
+                'planning' => $request->planning_rate.','. $request->planning_situation. ','. $request->planning_action. ','. $request->planning_result,
+                'service_delivery' => $request->service_delivery_rate.','. $request->service_delivery_situation. ','. $request->service_delivery_action. ','. $request->service_delivery_result,
+                'strategy_creatively' => $request->strategy_creatively_rate.','. $request->strategy_creatively_situation. ','. $request->strategy_creatively_action. ','. $request->strategy_creatively_result,
+                'leading_change' => $request->leading_change_rate.','. $request->leading_change_situation. ','. $request->leading_change_action. ','. $request->leading_change_result,
+                'building_relationship' => $request->building_relationship_rate.','. $request->building_relationship_situation. ','. $request->building_relationship_action. ','. $request->building_relationship_result,
+                'coaching' => $request->coaching_rate.','. $request->coaching_situation. ','. $request->coaching_action. ','. $request->coaching_result,
+                'creating_nurture_performance' => $request->creating_nurture_performance_rate.','. $request->creating_nurture_performance_situation. ','. $request->creating_nurture_performance_action. ','. $request->creating_nurture_performance_result,
+            ];
         }
-        // } elseif($salaryGrade >= 9 && $salaryGrade <= 17){
-        //     $competencies = ['dependability','adaptability', 'creative', 'teamwork',
-        //        'self_management', 'org_awareness', 'communication', 'initiative',
-        //        'service_delivery', 'customer_focus'];
-        //     foreach($competencies as $competency){
-        //         foreach($array as $item){
-        //             $validated = $request->validate([
-        //                 $competency.$item =>'required',
-        //             ]);
-        //         };
-        //     }
-        // } elseif($salaryGrade >= 18 && $salaryGrade <= 24){
-        //     $competencies = ['creative', 'teamwork','self_management','management',
-        //        'staff_management', 'org_awareness','strategic_planning','monitor_evaluation',
-        //         'planning','service_delivery', 'strategy_creatively', 'leading_change', 
-        //         'building_relationship', 'coaching', 'creating_nurture_performance'];
-        //     foreach($competencies as $competency){
-        //         foreach($array as $item){
-        //             $validated = $request->validate([
-        //                 $competency.$item =>'required',
-        //             ]);
-        //         };
-        //     }
-        // }
+        $beiApplicant = new SalaryGrade($data);
+        $beiApplicant->appilicant_id = $applicantID;
+        $beiApplicant->salary_grade = $salaryGrade;
+        
+        dd($beiApplicant);
     }
 
     public function generateBEI()
