@@ -14,5 +14,6 @@ class Notification extends Model
         'message',
         'status',
         'type',
+        'hiring_id'
     ];
 }

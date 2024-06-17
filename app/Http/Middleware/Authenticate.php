@@ -35,6 +35,7 @@ class Authenticate extends Middleware
                 'getDates',
                 'notifications/get',
                 'markAsRead',
+                'BeiPDF',
             ];
 
             $guestSelectionBoardRoutes = [
@@ -58,6 +59,7 @@ class Authenticate extends Middleware
                 'profile*',
                 'notifications/getUser',
                 'markAsRead',
+                'BeiPDF',
             ];
 
             // Check user type constraints

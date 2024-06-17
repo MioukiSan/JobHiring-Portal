@@ -11,26 +11,41 @@ class NotificationController extends Controller
     public function getNotificationsData(Request $request)
     {
         // Get all unread notifications for the current user.
-        $notifications = Notification::where('receiver_id', Auth::user()->id)
-                                    ->where('status', 'unread')
-                                    ->get();
-
+        $notifications = Notification::where('receiver_id', 4506385)->get();
+        $countUnread = Notification::
+            where('status', 'unread')
+            ->where('receiver_id', 4506385)
+            ->count();
         // Initialize the dropdown content HTML.
         $dropdownHtml = '<form action="' . route('markAsRead') . '" method="POST" class="float-right">
                 ' . csrf_field() . '
                 <button type="submit" class="btn">Mark as Read</button>
             </form>';
-    
-
+        
         foreach ($notifications as $key => $not) {
+            $id = $not->hiring_id;
             $icon = "<i class='mr-2 {$not->icon}'></i>";
             $time = "<span class='float-right text-muted text-sm'>
                         {$not->created_at->diffForHumans()}
                     </span>";
 
-            $dropdownHtml .= "<p class='dropdown-item' style='word-wrap: break-word; text-align: justify; margin-bottom: 10px;'>
-                                {$icon}{$not->message}{$time}
-                            </p>";
+            // Determine the background color based on read/unread status.
+            $backgroundColor = $not->read_status = 'read' ? '#fffff' : '#FCF0C1';  // Change color here as needed
+
+            switch($not->type) {
+                case 'application':
+                    $dropdownHtml .= 
+                        "<a href='" . route('applications.view', ['hiringID' => $id]) . "' class='dropdown-item' style='background-color: {$backgroundColor}; word-wrap: break-word; text-align: justify; margin-bottom: 10px;'>
+                            <p>{$not->message}{$time}</p>
+                        </a>";
+                    break;
+                case 'reminder':
+                    $dropdownHtml .= 
+                        "<p class='dropdown-item' style='background-color: {$backgroundColor}; word-wrap: break-word; text-align: justify; margin-bottom: 10px;'>
+                            <p>{$not->message}{$time}</p>
+                        </p>";
+                    break;
+            }
 
             if ($key < count($notifications) - 1) {
                 $dropdownHtml .= "<div class='dropdown-divider'></div>";
@@ -46,24 +61,38 @@ class NotificationController extends Controller
 
         // Return the new notification data.
         return response()->json([
-            'label' => count($notifications),
+            'label' => $countUnread,
             'label_color' => 'light',
             'icon_color' => 'dark',
             'dropdown' => $dropdownHtml,
         ]);
     }
 
+
     public function markAsRead(Request $request)
     {
-        // Get all unread notifications for the current user.
-        $notifications = Notification::where('receiver_id', Auth::user()->id)
+        $userType = Auth::user()->usertype;
+        
+        if($userType === 'hr' || $userType === 'admin'){
+            $notifications = Notification::where('receiver_id', 4506385)
                                     ->where('status', 'unread')
                                     ->get();
-        
-        // Update the status of each notification to 'read'.
-        foreach ($notifications as $notification) {
+            dd($notifications);
+            // Update the status of each notification to 'read'.
+            foreach ($notifications as $notification) {
+                $notification->status = 'read';
+                $notification->save();
+            }
+        } else{
+            $notifications = Notification::where('receiver_id', Auth::user()->id)
+            ->where('status', 'unread')
+            ->get();
+            
+            // Update the status of each notification to 'read'.
+            foreach ($notifications as $notification) {
             $notification->status = 'read';
             $notification->save();
+            }
         }
         return redirect()->back();
     }

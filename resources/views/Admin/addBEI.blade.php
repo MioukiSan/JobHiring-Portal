@@ -16,7 +16,7 @@
                     <div class="card-header">
                         Name of Applicant: {{ $name }}
                         <div class="card-tools">
-                            <form action="{{route('UploadBEI', ['applicationID' => $applicantID, 'salaryGrade' => $salaryGrade])}}" method="POST">
+                            <form action="{{route('UploadBEI', ['applicationID' => $applicantID, 'salaryGrade' => $salaryGrade, 'hiringID' =>$hiringID])}}" method="POST">
                                 @csrf
                                 <button type="submit" class="btn btn-primary btn-sm">SUBMIT</button>
                         </div>

@@ -28,6 +28,10 @@
                                 @endforeach
                             </ul>
                         </div>
+                        @elseif (session('success'))
+                        <div class="alert alert-success">
+                            {{ session('success') }}
+                        </div>
                     @endif
                     <div class="card-header">Hiring & Applicants Details
                     {{-- @if ($hiring_status === 'BEI' && Auth::user()->usertype === 'hr')
@@ -35,7 +39,7 @@
                         <a href="" class="btn btn-primary btn-float-end btn-sm" title="Click to add BEI rating for Applicants.">Behavioral Event Interview</a>
                     </div>
                     @else --}}
-                    @if ($hiring_status === 'Closed' && Auth::user()->usertype === 'hr')
+                    @if ($hiring_status === 'Closed' && Auth::user()->usertype === 'admin')
                     <div class="card-tools">
                         <x-adminlte-button class="btn-sm" label="Click to View" data-toggle="modal" data-target="#SelectApplicants" />
                         <x-adminlte-modal id="SelectApplicants" title="Select Applicants" v-centered>
@@ -187,7 +191,7 @@
                                                 @endif
                                                 <td>
                                                 @if (!empty($applicant['competency']))  
-                                                    <p class="{{ $applicant['competency_result'] === 'Not Selected' ? 'text-danger' : ($applicant['competency_result'] === 'Passed' ? 'text-success' : '') }}">
+                                                    <p class="{{ $applicant['competency_result'] === 'Failed' ? 'text-danger' : ($applicant['competency_result'] === 'Passed' ? 'text-success' : '') }}">
                                                         {{ $applicant['competency_result'] }}
                                                     </p>
                                                     <p>Exam File: <a href="{{ asset('storage/' . $applicant['competency']) }}" target="_blank">View</a></p>
@@ -195,7 +199,7 @@
                                                 </td>
                                                 <td>
                                                     @if (!empty($applicant['pre_result']))  
-                                                    <p class="{{ $applicant['pre_result'] === 'Not Selected' ? 'text-danger' : ($applicant['competency_result'] === 'Passed' ? 'text-success' : '') }}">
+                                                    <p class="{{ $applicant['pre_result'] === 'Failed' ? 'text-danger' : ($applicant['competency_result'] === 'Passed' ? 'text-success' : '') }}">
                                                         {{ $applicant['pre_result'] }}
                                                     </p>
                                                     <p>Exam File: <a href="{{ asset('storage/' . $applicant['pre_employment']) }}" target="_blank">View</a></p>
@@ -203,7 +207,7 @@
                                                 </td>
                                                 <td>
                                                 @if (!empty($applicant['initial_result']))
-                                                <p class="{{ $applicant['initial_result'] === 'Not Selected' ? 'text-danger' : ($applicant['initial_result'] === 'Passed' ? 'text-success' : '') }}">
+                                                <p class="{{ $applicant['initial_result'] === 'Failed' ? 'text-danger' : ($applicant['initial_result'] === 'Passed' ? 'text-success' : '') }}">
                                                     {{$applicant['initial_result']}}
                                                 </p>
                                                     <a href="{{ asset('storage/' . $applicant['initial']) }}" target="_blank">Interview File</a>
@@ -262,7 +266,7 @@
                                                 @if ($job_type == 'SRS-1' || $job_type == 'Entry')
                                                     <td>
                                                         @if (!empty($applicant['pre_result']))  
-                                                        <p class="{{ $applicant['pre_result'] === 'Not Selected' ? 'text-danger' : ($applicant['competency_result'] === 'Passed' ? 'text-success' : '') }}">
+                                                        <p class="{{ $applicant['pre_result'] === 'Failed' ? 'text-danger' : ($applicant['competency_result'] === 'Passed' ? 'text-success' : '') }}">
                                                             {{ $applicant['pre_result'] }}
                                                         </p>
                                                         <p>Exam File: <a href="{{ asset('storage/' . $applicant['pre_employment']) }}" target="_blank">View</a></p>
@@ -271,16 +275,25 @@
                                                 @else
                                                 @endif
                                                 <td>
-                                                    @if (!empty($applicant['bei']) && $applicant['bei'] != 'Not Selected')
-                                                    @elseif ($applicant['application_status'] === 'Passed' && Auth::user()->usertype === 'selection board' && empty($applicant['bei'] && $hiring_status == 'BEI'))
-                                                    <a href="{{ route('IndividualBEI', ['ApplicantID' => $applicant['applicant_id']]) }}" target="_blank">Add BEI</a>
-                                                    @else
-                                                        @if(!empty($applicant['bei']))
-                                                        <p class="{{ $applicant['bei'] === 'Not Selected' ? 'text-danger' : ($applicant['bei'] === 'Passed' ? 'text-success' : '') }}">
-                                                            {{ $applicant['bei'] }}
-                                                        </p>
-                                                        <a href="" target="_blank">View BEI</a>
+                                                    @if (Auth::user()->usertype === 'selection board')
+                                                        @if (!empty($applicant['bei']))
+                                                            <p class="{{ $applicant['bei'] === 'Failed' ? 'text-danger' : ($applicant['bei'] === 'Passed' ? 'text-success' : '') }}">
+                                                                {{ $applicant['bei'] }}
+                                                            </p> 
+                                                        @endif
+                                                        @if ($applicant['selection_id'] === Auth::user()->id && $applicant['applicant_id'] != NULL)
+                                                            <a href="{{route('generateBEI', ['applicantID' => $applicant['applicant_id']])}}" target="_blank">View BEI</a>
                                                         @else
+                                                            <a href="{{ route('IndividualBEI', ['applicantID' => $applicant['applicant_id']]) }}">Add BEI</a>
+                                                        @endif
+                                                    @else
+                                                        @if ($applicant['application_status'] != 'Failed')
+                                                            @if (!empty($applicant['bei']))
+                                                                <p class="{{ $applicant['bei'] === 'Failed' ? 'text-danger' : ($applicant['bei'] === 'Passed' ? 'text-success' : '') }}">
+                                                                    {{ $applicant['bei'] }}
+                                                                </p>
+                                                                <a href="{{route('generateBEI', ['applicantID' => $applicant['applicant_id']])}}" target="_blank">View BEI</a>
+                                                            @endif
                                                         @endif
                                                     @endif
                                                 </td>

@@ -69,8 +69,9 @@ class ApplicationUserController extends Controller
             $app->save();
             
             $notification = new Notification();
-            $notification->receiver_id = 1;
+            $notification->receiver_id = 4506385;
             $notification->sender_id = $userId;
+            $notification->hiring_id = $id;
             $notification->Message = 'You have received an application for a job from ' . Auth::user()->name ;
             $notification->type = 'application';
             $notification->Status = 'unread';
@@ -103,7 +104,7 @@ class ApplicationUserController extends Controller
             $application->save();
 
             $notification = new Notification();
-            $notification->receiver_id = 1;
+            $notification->receiver_id = 4506385;
             $notification->sender_id = Auth::id();
             $notification->Message = Auth::user()->name . 'Has cancelled an application for a job';
             $notification->type = 'application';
