@@ -24,6 +24,8 @@ class JobHiringController extends Controller
     
      public function index()
      {
+        
+
          // Use left join to ensure jobs without applicants are also included
          $hiringOpen = Hiring::leftJoin('applicants', 'hirings.id', '=', 'applicants.hiring_id')
              ->select('hirings.*', DB::raw('COUNT(applicants.id) as application_count'))
@@ -155,7 +157,7 @@ class JobHiringController extends Controller
             'contract_type' => 'required|string|in:COS,Permanent',
             'job_type' => 'required|string|in:Entry,SRS-1,SRS-2',
             'job_status' => 'required|string',
-            'salary_grade' => 'required|integer|min:1|max:10',
+            'salary_grade' => 'required|integer|min:1|max:24',
             'department' => 'required|string',
             'closing' => 'required|date_format:Y-m-d\TH:i',
             'competency_exam_date' => 'nullable|date',

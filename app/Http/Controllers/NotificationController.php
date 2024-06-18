@@ -11,7 +11,7 @@ class NotificationController extends Controller
     public function getNotificationsData(Request $request)
     {
         // Get all unread notifications for the current user.
-        $notifications = Notification::where('receiver_id', 4506385)->get();
+        $notifications = Notification::where('receiver_id', 4506385)->orderBy('created_at', 'desc')->get();
         $countUnread = Notification::
             where('status', 'unread')
             ->where('receiver_id', 4506385)
@@ -30,7 +30,7 @@ class NotificationController extends Controller
                     </span>";
 
             // Determine the background color based on read/unread status.
-            $backgroundColor = $not->read_status = 'read' ? '#fffff' : '#FCF0C1';  // Change color here as needed
+            $backgroundColor = $not->read_status === 'unread' ? '#FCF0C1' : '#fffff';  // Change color here as needed
 
             switch($not->type) {
                 case 'application':
@@ -77,7 +77,7 @@ class NotificationController extends Controller
             $notifications = Notification::where('receiver_id', 4506385)
                                     ->where('status', 'unread')
                                     ->get();
-            dd($notifications);
+  
             // Update the status of each notification to 'read'.
             foreach ($notifications as $notification) {
                 $notification->status = 'read';
@@ -100,7 +100,9 @@ class NotificationController extends Controller
     public function ApplicantsNotif()
     {
         // Fetch all notifications for the authenticated user
-        $notifications = Notification::where('receiver_id', Auth::user()->id)->get();
+        $notifications = Notification::where('receiver_id', Auth::user()->id)
+            ->orderBy('created_at', 'desc')
+            ->get();
 
         // Count unread notifications
         $countNotifUnread = Notification::where('receiver_id', Auth::user()->id)

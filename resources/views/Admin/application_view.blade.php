@@ -39,7 +39,7 @@
                         <a href="" class="btn btn-primary btn-float-end btn-sm" title="Click to add BEI rating for Applicants.">Behavioral Event Interview</a>
                     </div>
                     @else --}}
-                    @if ($hiring_status === 'Closed' && Auth::user()->usertype === 'admin')
+                    @if ($hiring_status === 'Closed' && Auth::user()->usertype === 'hr')
                     <div class="card-tools">
                         <x-adminlte-button class="btn-sm" label="Click to View" data-toggle="modal" data-target="#SelectApplicants" />
                         <x-adminlte-modal id="SelectApplicants" title="Select Applicants" v-centered>
@@ -292,6 +292,8 @@
                                                                 <p class="{{ $applicant['bei'] === 'Failed' ? 'text-danger' : ($applicant['bei'] === 'Passed' ? 'text-success' : '') }}">
                                                                     {{ $applicant['bei'] }}
                                                                 </p>
+                                                            @endif
+                                                            @if ($applicant['applicantId'] != NULL)
                                                                 <a href="{{route('generateBEI', ['applicantID' => $applicant['applicant_id']])}}" target="_blank">View BEI</a>
                                                             @endif
                                                         @endif

@@ -55,7 +55,6 @@
                                 </div>
                             </div>
                             @endforeach
-                        </form>
                         @if ($leadershipCompetencies != NULL)
                         <h5 class="my-3 text-center"><b>LEADERSHIP COMPETENCIES</b></h5>
                         @foreach ($leadershipCompetencies as $item)
@@ -91,6 +90,7 @@
                             </div>
                         </div>
                         @endforeach
+                    </form>
                         @else
                         @endif
                     </div>                    

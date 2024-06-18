@@ -24,9 +24,6 @@
     </style>
 </head>
 <body>
-    @php
-        $salary_grade = $sgID;
-    @endphp
     <div class="container-fluid">
         <div class="row">
             <div class="col-mb-12">
@@ -48,36 +45,69 @@
                     </tbody>
                 </table>
             </div>
-                <table class="table table-bordered table-custom">
-                    <thead>
-                        <tr class="text-center">
-                            <th>COMPETENCIES</th>
-                            <th>RATING</th>
-                            <th colspan="3">DOCUMENTATION NOTES</th>
-                        </tr>
-                        <tr class="tr-custom text-center">
-                            <th colspan="2"></th>
-                            <th>SITUATION OR TASK/S</th>
-                            <th>ACTION/S</th>
-                            <th>RESULT/S</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                            @if ($salary_grade >= 1 && $salary_grade <= 17)
-                                @foreach($beiDatas as $data)
-                                    <tr>
-                                        <td>{{ $data['label'] }}</td>
-                                        {{-- @php
-                                            $item = $data['data'];
-                                        @endphp --}}
-                                        @foreach ($data['data'] as $item)
-                                            <td>{{$item}}</td>
+                @foreach ($beiDatas as $beiData)
+                <div class="table table-bordered table-custom">
+                    <table class="table">
+                        <thead>
+                            <tr class="text-center">
+                                <th>COMPETENCIES</th>
+                                <th>RATING</th>
+                                <th colspan="3">DOCUMENTATION NOTES</th>
+                            </tr>
+                            <tr class="tr-custom text-center">
+                                <th colspan="2"></th>
+                                <th>SITUATION OR TASK/S</th>
+                                <th>ACTION/S</th>
+                                <th>RESULT/S</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if ($beiData['sgID'] >= 1 && $beiData['sgID'] <= 24)
+                                @foreach ($beiData['competencies'] as $key => $competency)
+                                    @if ($key !== 'leadership')
+                                        <tr>
+                                            <td>{{ $competency['label'] }}</td>
+                                            @foreach ($competency['data'] as $item)
+                                                <td>{{ $item }}</td>
+                                            @endforeach
+                                        </tr>
+                                    @else
+                                        <tr>
+                                            <td colspan="5" class="text-center">LEADERSHIP COMPETENCIES</td>
+                                        </tr>
+                                        @foreach ($competency as $subKey => $subCompetency)
+                                            <tr>
+                                                <td>{{ $subCompetency['label'] }}</td>
+                                                @foreach ($subCompetency['data'] as $item)
+                                                    <td>{{ $item }}</td>
+                                                @endforeach
+                                            </tr>
                                         @endforeach
-                                    </tr>
+                                    @endif
                                 @endforeach
                             @endif
-                    </tbody>
-                </table>
+
+
+    
+                            {{-- @if ($beiData['sgID'] >= 18 && $beiData['sgID'] <= 24)
+                                <tr>
+                                    <td colspan="5" class="text-center">LEADERSHIP COMPETENCIES</td>
+                                </tr>
+                                @if (array_key_exists('leadership', $beiData['competencies']))
+                                    @foreach ($beiData['competencies']['leadership'] as $leadership)
+                                        <tr>
+                                            <td>{{ $leadership['label'] }}</td>
+                                            @foreach ($leadership['data'] as $item)
+                                                <td>{{ $item }}</td>
+                                            @endforeach
+                                        </tr>
+                                    @endforeach
+                                @endif
+                            @endif --}}
+                        </tbody>
+                    </table>
+                </div>
+                @endforeach
             </div>
         </div>
     </div>

@@ -133,7 +133,7 @@ class ApplicationController extends Controller
                         'eligibility' => optional($applicant->user->requirement)->eligibility,
                         'job_type' => optional($applicant->hiring)->job_type,
                         'selection_id' => optional($applicant->SalaryGrade)->selection_board_id,
-                        // 'applicantId' => optional($applicant->SalaryGrade)->applicant_id,
+                        'applicantId' => optional($applicant->SalaryGrade)->applicant_id,
                     ];
                 });
             } else {
@@ -161,7 +161,7 @@ class ApplicationController extends Controller
                         'eligibility' => optional($applicant->user->requirement)->eligibility,
                         'job_type' => optional($applicant->hiring)->job_type,
                         'selection_id' => optional($applicant->SalaryGrade)->selection_board_id,
-                        // 'applicantId' => optional($applicant->SalaryGrade)->applicant_id,
+                        'applicantId' => optional($applicant->SalaryGrade)->applicant_id,
                     ];
                 });
             }
@@ -190,7 +190,7 @@ class ApplicationController extends Controller
                     'eligibility' => optional($applicant->user->requirement)->eligibility,
                     'job_type' => optional($applicant->hiring)->job_type,
                     'selection_id' => optional($applicant->SalaryGrade)->selection_board_id,
-                    // 'applicantId' => optional($applicant->SalaryGrade)->applicant_id,
+                    'applicantId' => optional($applicant->SalaryGrade)->applicant_id,
                 ];
             });
         }        
@@ -237,7 +237,7 @@ class ApplicationController extends Controller
         if($selectedIds === NULL){
             Applicant::whereIn('id', $notSelectedIds)->update(['application_status' => 'Failed']);
             $updateStatus = Hiring::find($hiringID);
-            $updateStatus->job_status = ($statusHiring === 'Closed' || $statusHiring === 'Final Shortlisting') ? 'Competency Exam' : 'Initial Interview';
+            $updateStatus->job_status = ($statusHiring === 'Closed') ? 'Competency Exam' : 'Initial Interview';
             if($updateStatus->save()){
                 return redirect()->back()->with('info', 'Applicants updated successfully.');
             } else {
@@ -247,7 +247,7 @@ class ApplicationController extends Controller
             Applicant::whereIn('id', $notSelectedIds)->update(['application_status' => 'Failed']);
             Applicant::whereIn('id', $selectedIds)->update(['application_status' => 'Passed']);
             $updateStatus = Hiring::find($hiringID);
-            $updateStatus->job_status = ($statusHiring === 'Closed' || $statusHiring === 'Final Shortlisting') ? 'Competency Exam' : 'Initial Interview';
+            $updateStatus->job_status = ($statusHiring === 'Closed') ? 'Competency Exam' : 'Initial Interview';
             if($updateStatus->save()){
                 return redirect()->back()->with('info', 'Applicants updated successfully.');
             } else {
@@ -259,12 +259,15 @@ class ApplicationController extends Controller
     public function updateApplicant(Request $request){
         $Purpose = $request->for;
         $ApplicantID = $request->applicant_id;
-        $user_id = Applicant::select('user_id')->where('id', $ApplicantID)->first();
-        
+
+        $applicant = Applicant::with('user', 'hiring')
+            ->where('id', $ApplicantID)
+            ->first();
+
         if($Purpose == 'Competency'){
             // Step 3: Perform validation on the incoming data
             $validatedData = $request->validate([
-                'competencyFile' => 'required|file|mimes:pdf|max:2048',
+                'competency File' => 'required|file|mimes:pdf|max:2048',
                 'CompetencyResult' => 'required|in:Passed,Failed',
             ]);
     
@@ -353,23 +356,27 @@ class ApplicationController extends Controller
         
             if ($affected) {
                 if ($request->FinalResult === 'Passed') {
-                    $message = 'This notification is to inform you that you have passed the final interview. Please wait for our call or mail. Thank you!';
-                    $notifFinalInterview = Notification::create([
+                    $message = 'This notification is to inform you that you have passed the final interview for '. $applicant->hiring->job_position . '. Please wait for our call or mail. Thank you!';
+                    Notification::create([
                         'sender_id' => NULL,
-                        'receiver_id' => $user_id,
+                        'receiver_id' => $applicant->user_id,
                         'message' => $message,
                         'status' => 'unread',
                         'type' => 'update',
                     ]);
                     
-                    if ($notifFinalInterview) {
-                        return redirect()->back()->with('success', 'Applicant updated and notification sent successfully.');
-                    } else {
-                        return redirect()->back()->with('error', 'Applicant updated, but failed to send notification.');
-                    }
+                    
                 } else {
-                    return redirect()->back()->with('success', 'Applicant updated successfully.');
+                    $message = 'This notification is to inform you that your final interview was outstanding for the '. $applicant->hiring->job_position . ', but some applicant surpass your performance. Thank you!';
+                    Notification::create([
+                        'sender_id' => NULL,
+                        'receiver_id' => $applicant->user_id,
+                        'message' => $message,
+                        'status' => 'unread',
+                        'type' => 'update',
+                    ]);
                 }
+                return redirect()->back()->with('success', 'Applicant updated successfully.');
             } else {
                 return redirect()->back()->with('error', 'Failed to update applicant.');
             }
@@ -434,7 +441,7 @@ class ApplicationController extends Controller
                 ['name' => 'LEADING CHANGE', 'labelDB' => 'leading_change'],
                 ['name' => 'BUILDING COLLABORATIVE INCLUSIVE WORKING RELATIONSHIPS', 'labelDB' => 'building_relationship'],
                 ['name' => 'MANAGING PERFORMANCE AND COACHING FOR RESULTS', 'labelDB' => 'coaching'],
-                ['name' => 'CREATING & NURTURING A HIGH PERFORMING ORGANISATION', 'labelDB' => 'creating_nurture_performance']
+                ['name' => 'CREATING & NURTURING A HIGH PERFORMING ORGANISATION', 'labelDB' => 'create_nurture_performance']
             ];
             
         $data = [
@@ -463,6 +470,7 @@ class ApplicationController extends Controller
         $applicantID = $request->applicationID;
         $hiringID = $request->hiringID;
 
+        dd($request->all());
         $salaryGrade = $request->salaryGrade;
         if($salaryGrade >= 1 && $salaryGrade <= 8){
             $data = [
@@ -492,7 +500,7 @@ class ApplicationController extends Controller
                 'self_management' => $request->self_management_rate.','. $request->self_management_situation. ','. $request->self_management_action. ','. $request->self_management_result,
                 'management' => $request->management_rate.','. $request->management_situation. ','. $request->management_action. ','. $request->management_result,
                 'staff_management' => $request->staff_management_rate.','. $request->staff_management_situation. ','. $request->staff_management_action. ','. $request->staff_management_result,
-                'org_wareness' => $request->org_awareness_rate.','. $request->org_awareness_situation. ','. $request->org_awareness_action. ','. $request->org_awareness_result,
+                'org_awareness' => $request->org_awareness_rate.','. $request->org_awareness_situation. ','. $request->org_awareness_action. ','. $request->org_awareness_result,
                 'stategic_planning' => $request->stategic_planning_rate.','. $request->stategic_planning_situation. ','. $request->stategic_planning_action. ','. $request->stategic_planning_result,
                 'monitor_evaluation' => $request->monitor_evaluation_rate.','. $request->monitor_evaluation_situation. ','. $request->monitor_evaluation_action. ','. $request->monitor_evaluation_result,
                 'planning' => $request->planning_rate.','. $request->planning_situation. ','. $request->planning_action. ','. $request->planning_result,
@@ -501,7 +509,7 @@ class ApplicationController extends Controller
                 'leading_change' => $request->leading_change_rate.','. $request->leading_change_situation. ','. $request->leading_change_action. ','. $request->leading_change_result,
                 'building_relationship' => $request->building_relationship_rate.','. $request->building_relationship_situation. ','. $request->building_relationship_action. ','. $request->building_relationship_result,
                 'coaching' => $request->coaching_rate.','. $request->coaching_situation. ','. $request->coaching_action. ','. $request->coaching_result,
-                'creating_nurture_performance' => $request->creating_nurture_performance_rate.','. $request->creating_nurture_performance_situation. ','. $request->creating_nurture_performance_action. ','. $request->creating_nurture_performance_result,
+                'create_nurture_performance' => $request->create_nurture_performance_rate.','. $request->create_nurture_performance_situation. ','. $request->create_nurture_performance_action. ','. $request->create_nurture_performance_result,
             ];
         }
         $beiApplicant = new SalaryGrade($data);
@@ -519,77 +527,98 @@ class ApplicationController extends Controller
     }
 
     public function generateBEI(Request $request)
-{
-    $usertype = Auth::user()->usertype;
-    //there is more than 1 in the SalaryGrade that is for the applicantID, when it is admin or hr it will do get all of it but when I use get i gott an error
-    if ($usertype == 'admin' || $usertype == 'hr') {
-        $beiData = Applicant::with(['user', 'SalaryGrade', 'hiring'])
-            ->where('id', $request->applicantID)
-            ->first(); // Assuming only one applicant
-    } else {
-        $beiData = Applicant::with(['user', 'SalaryGrade', 'hiring'])
-            ->where('id', $request->applicantID)
-            ->whereHas('SalaryGrade', function ($query) {
-                $query->where('selection_board_id', Auth::user()->id);
-            })
-            ->first();
-    }
+    {
+        $usertype = Auth::user()->usertype;
 
-    $sgID = $beiData->SalaryGrade->salary_grade;
+        if ($usertype == 'admin' || $usertype == 'hr') {
+            $beiData = SalaryGrade::select('s.*', 'h.job_position', 'h.bei_date', 'u.name', 'a.id')
+            ->from('salary_grades as s')
+            ->leftJoin('applicants as a', 'a.id', '=', 's.applicant_id')
+            ->leftJoin('users as u', 'u.id', '=', 'a.user_id')
+            ->leftJoin('hirings as h', 'h.id', '=', 'a.hiring_id')
+            ->where('applicant_id', $request->applicantID)
+            ->get();// Assuming only one applicant
+        } else {
+            $beiData = SalaryGrade::select('s.*', 'h.job_position', 'h.bei_date', 'u.name', 'a.id')
+                ->from('salary_grades as s')
+                ->leftJoin('applicants as a', 'a.id', '=', 's.applicant_id')
+                ->leftJoin('users as u', 'u.id', '=', 'a.user_id')
+                ->leftJoin('hirings as h', 'h.id', '=', 'a.hiring_id')
+                ->where('applicant_id', $request->applicantID)
+                ->where('s.selection_board_id', Auth::user()->id)
+                ->get();
+        }
 
-        if ($sgID >= 1 && $sgID <= 8) {
-            $competencies = [
-                'dependability' => ['label' => 'DEPENDABILITY', 'data' => explode(',', $beiData->SalaryGrade->dependability)],
-                'creative' => ['label' => 'CREATIVE & INNOVATIVE THINKING', 'data' => explode(',', $beiData->SalaryGrade->creative)],
-                'initiative' => ['label' => 'INITIATIVE', 'data' => explode(',', $beiData->SalaryGrade->initiative)],
-                'time_management' => ['label' => 'TIME MANAGEMENT', 'data' => explode(',', $beiData->SalaryGrade->time_management)],
-                'planning' => ['label' => 'PLANNING & ORGANIZING', 'data' => explode(',', $beiData->SalaryGrade->planning)],
+        $allCompetencies = [];
+        // Iterate over each SalaryGrade
+        foreach ($beiData as $salaryGrade) {
+            $sgID = $salaryGrade->salary_grade;
+            $competencies = [];
+
+            $competencies = [];
+
+            if ($sgID >= 1 && $sgID <= 8) {
+                $competencies = [
+                    'dependability' => ['label' => 'DEPENDABILITY', 'data' => explode(',', $salaryGrade->dependability)],
+                    'creative' => ['label' => 'CREATIVE & INNOVATIVE THINKING', 'data' => explode(',', $salaryGrade->creative)],
+                    'initiative' => ['label' => 'INITIATIVE', 'data' => explode(',', $salaryGrade->initiative)],
+                    'time_management' => ['label' => 'TIME MANAGEMENT', 'data' => explode(',', $salaryGrade->time_management)],
+                    'planning' => ['label' => 'PLANNING & ORGANIZING', 'data' => explode(',', $salaryGrade->planning)],
+                ];
+            } elseif ($sgID >= 9 && $sgID <= 17) {
+                $competencies = [
+                    'dependability' => ['label' => 'DEPENDABILITY', 'data' => explode(',', $salaryGrade->dependability)],
+                    'creative' => ['label' => 'CREATIVE & INNOVATIVE THINKING', 'data' => explode(',', $salaryGrade->creative)],
+                    'adaptability' => ['label' => 'ADAPTABILITY', 'data' => explode(',', $salaryGrade->adaptability)],
+                    'teamwork' => ['label' => 'TEAMWORK', 'data' => explode(',', $salaryGrade->teamwork)],
+                    'self_management' => ['label' => 'SELF MANAGEMENT', 'data' => explode(',', $salaryGrade->self_management)],
+                    'org_awareness' => ['label' => 'ORGANIZATIONAL AWARENESS', 'data' => explode(',', $salaryGrade->org_awareness)],
+                    'communication' => ['label' => 'COMMUNICATION', 'data' => explode(',', $salaryGrade->communication)],
+                    'initiative' => ['label' => 'INITIATIVE', 'data' => explode(',', $salaryGrade->initiative)],
+                    'service_delivery' => ['label' => 'SERVICE DELIVERY', 'data' => explode(',', $salaryGrade->service_delivery)],
+                    'customer_focus' => ['label' => 'CUSTOMER FOCUS', 'data' => explode(',', $salaryGrade->customer_focus)],
+                ];
+            } elseif ($sgID >= 18 && $sgID <= 24) {
+                $competencies = [
+                    'creative' => ['label' => 'CREATIVE & INNOVATIVE THINKING', 'data' => explode(',', $salaryGrade->creative)],
+                    'teamwork' => ['label' => 'TEAMWORK', 'data' => explode(',', $salaryGrade->teamwork)],
+                    'self_management' => ['label' => 'SELF MANAGEMENT', 'data' => explode(',', $salaryGrade->self_management)],
+                    'management' => ['label' => 'MANAGING PROJECTS OR PROGRAMS', 'data' => explode(',', $salaryGrade->management)],
+                    'staff_management' => ['label' => 'STAFF MANAGEMENT', 'data' => explode(',', $salaryGrade->staff_management)],
+                    'org_awareness' => ['label' => 'ORGANIZATIONAL AWARENESS', 'data' => explode(',', $salaryGrade->org_awareness)],
+                    'strategic_planning' => ['label' => 'STRATEGIC PLANNING', 'data' => explode(',', $salaryGrade->strategic_planning)],
+                    'monitor_evaluation' => ['label' => 'MONITORING AND EVALUATING', 'data' => explode(',', $salaryGrade->monitor_evaluation)],
+                    'planning' => ['label' => 'PLANNING, ORGANISING & DELIVERY', 'data' => explode(',', $salaryGrade->planning)],
+                    'service_delivery' => ['label' => 'SERVICE DELIVERY', 'data' => explode(',', $salaryGrade->service_delivery)],
+                    'leadership' => [
+                        'strategy_creatively' => ['label' => 'THINKING STRATEGICALLY & CREATIVELY', 'data' => explode(',', $salaryGrade->strategy_creatively)],
+                        'leading_change' => ['label' => 'LEADING CHANGE', 'data' => explode(',', $salaryGrade->leading_change)],
+                        'building_relationship' => ['label' => 'BUILDING COLLABORATIVE INCLUSIVE WORKING RELATIONSHIPS', 'data' => explode(',', $salaryGrade->building_relationship)],
+                        'coaching' => ['label' => 'MANAGING PERFORMANCE AND COACHING FOR RESULTS', 'data' => explode(',', $salaryGrade->coaching)],
+                        'create_nurture_performance' => ['label' => 'CREATING & NURTURING A HIGH PERFORMING ORGANISATION', 'data' => explode(',', $salaryGrade->create_nurture_performance)],
+                    ]
+                ];
+            }
+            $allCompetencies[] = [
+                'sgID' => $salaryGrade->salary_grade,
+                'competencies' => $competencies
             ];
-        } elseif ($sgID >= 9 && $sgID <= 17) {
-            $competencies = [
-                'dependability' => ['label' => 'DEPENDABILITY', 'data' => explode(',', $beiData->SalaryGrade->dependability)],
-                'creative' => ['label' => 'CREATIVE & INNOVATIVE THINKING', 'data' => explode(',', $beiData->SalaryGrade->creative)],
-                'adaptability' => ['label' => 'ADAPTABILITY', 'data' => explode(',', $beiData->SalaryGrade->adaptability)],
-                'teamwork' => ['label' => 'TEAMWORK', 'data' => explode(',', $beiData->SalaryGrade->teamwork)],
-                'self_management' => ['label' => 'SELF MANAGEMENT', 'data' => explode(',', $beiData->SalaryGrade->self_management)],
-                'org_awareness' => ['label' => 'ORGANIZATIONAL AWARENESS', 'data' => explode(',', $beiData->SalaryGrade->org_awareness)],
-                'communication' => ['label' => 'COMMUNICATION', 'data' => explode(',', $beiData->SalaryGrade->communication)],
-                'initiative' => ['label' => 'INITIATIVE', 'data' => explode(',', $beiData->SalaryGrade->initiative)],
-                'service_delivery' => ['label' => 'SERVICE DELIVERY', 'data' => explode(',', $beiData->SalaryGrade->service_delivery)],
-                'customer_focus' => ['label' => 'CUSTOMER FOCUS', 'data' => explode(',', $beiData->SalaryGrade->customer_focus)],
-            ];
-        } elseif ($sgID >= 18 && $sgID <= 24) {
-            $competencies = [
-                'creative' => ['label' => 'CREATIVE & INNOVATIVE THINKING', 'data' => explode(',', $beiData->SalaryGrade->creative)],
-                'teamwork' => ['label' => 'TEAMWORK', 'data' => explode(',', $beiData->SalaryGrade->teamwork)],
-                'self_management' => ['label' => 'SELF MANAGEMENT', 'data' => explode(',', $beiData->SalaryGrade->self_management)],
-                'management' => ['label' => 'MANAGING PROJECTS OR PROGRAMS', 'data' => explode(',', $beiData->SalaryGrade->management)],
-                'staff_management' => ['label' => 'STAFF MANAGEMENT', 'data' => explode(',', $beiData->SalaryGrade->staff_management)],
-                'org_awareness' => ['label' => 'ORGANIZATIONAL AWARENESS', 'data' => explode(',', $beiData->SalaryGrade->org_awareness)],
-                'strategic_planning' => ['label' => 'STRATEGIC PLANNING', 'data' => explode(',', $beiData->SalaryGrade->strategic_planning)],
-                'monitor_evaluation' => ['label' => 'MONITORING AND EVALUATING', 'data' => explode(',', $beiData->SalaryGrade->monitor_evaluation)],
-                'planning' => ['label' => 'PLANNING, ORGANISING & DELIVERY', 'data' => explode(',', $beiData->SalaryGrade->planning)],
-                'service_delivery' => ['label' => 'SERVICE DELIVERY', 'data' => explode(',', $beiData->SalaryGrade->service_delivery)],
-                'leadership' => [
-                    'strategy_creatively' => ['label' => 'THINKING STRATEGICALLY & CREATIVELY', 'data' => explode(',', $beiData->SalaryGrade->strategy_creatively)],
-                    'leading_change' => ['label' => 'LEADING CHANGE', 'data' => explode(',', $beiData->SalaryGrade->leading_change)],
-                    'building_relationship' => ['label' => 'BUILDING COLLABORATIVE INCLUSIVE WORKING RELATIONSHIPS', 'data' => explode(',', $beiData->SalaryGrade->building_relationship)],
-                    'coaching' => ['label' => 'MANAGING PERFORMANCE AND COACHING FOR RESULTS', 'data' => explode(',', $beiData->SalaryGrade->coaching)],
-                    'creating_nurture_performance' => ['label' => 'CREATING & NURTURING A HIGH PERFORMING ORGANISATION', 'data' => explode(',', $beiData->SalaryGrade->creating_nurture_performance)],
-                ]
-            ];
+        };
+
+        foreach($beiData as $item){
+            $name = $item->name;
+            $jobPosition = $item->job_position;
+            $beiDate = $item->bei_date;
         }
         $data = [
-            'name' => $beiData->user->name,
-            'position' => $beiData->hiring->job_position,
-            'beiDate' => $beiData->hiring->bei_date,
-            'beiDatas' => $competencies,
-            'sgID' => $sgID,
+            'name' => $name,
+            'position' => $jobPosition,
+            'beiDate' => $beiDate,
+            'beiDatas' => $allCompetencies,
         ];
-        
+
         $pdf = Pdf::loadView('BEI_template', $data)->setPaper('a4', 'landscape');
 
-        // Download the generated PDF
         return $pdf->stream('BEI.pdf');
     }
 

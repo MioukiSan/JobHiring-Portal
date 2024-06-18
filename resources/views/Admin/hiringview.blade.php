@@ -102,7 +102,7 @@
                                             <label for="salary_grade">Salary Grade</label>
                                             <select class="form-control" id="salary_grade" name="salary_grade" required>
                                                 <option value="" disabled>Select salary grade</option>
-                                                @for($id = 1; $id <= 10; $id++)
+                                                @for($id = 1; $id <= 24; $id++)
                                                     <option value="{{ $id }}" {{ $hiring->salary_grade == $id ? 'selected' : '' }}>{{ $id }}</option>
                                                 @endfor
                                             </select>
