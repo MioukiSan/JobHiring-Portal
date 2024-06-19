@@ -42,9 +42,9 @@ class Authenticate extends Middleware
                 'applicants*',
                 'BeiPDF*',
                 'upload*',
-                'initial-interview*',
                 'view-applications*',
                 'getDates',
+                'BEIUpdateGuest',
                 'BEIUpdate',
                 'UploadBEI',
             ];

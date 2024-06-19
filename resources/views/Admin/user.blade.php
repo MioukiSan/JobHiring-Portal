@@ -30,44 +30,6 @@
         @endif
         <div class="card">
             <div class="card-header">User Table
-                <div class="card-tools">
-                    <div class="input-group">
-                        {{-- <form action="" class="form-inline">
-                            <input type="text" id="search" name="search" class="form-control form-control-sm float-right" placeholder="Search">
-                            <div class="input-group-append">
-                                <button type="submit" class="btn btn-default btn-sm mr-2">
-                                    <i class="fas fa-search"></i>
-                                </button>
-                            </div>
-                        </form> --}}
-                        @if(auth()->user()->usertype == 'admin' || auth()->user()->usertype == 'hr')
-                        <x-adminlte-button class="btn btn-sm" id="btnView" label="Add User" icon="fas fa-solid fa-user-plus" theme="primary" data-toggle="modal" data-target="#addusermodal" />
-                        <x-adminlte-modal id="addusermodal" title="Add New User">
-                            <form id="addUser" action="{{route('users.store')}}" method="POST">
-                                @csrf
-                                <x-adminlte-input name="name" label="Name" placeholder="Enter name" />
-                                <x-adminlte-input name="email" label="Email" placeholder="Enter email" />
-                                <x-adminlte-input name="password" label="Password" placeholder="Enter password" type="password" />
-                                <div class="form-group">
-                                    <label for="usertype">User Type</label>
-                                    <select class="form-control" id="usertype" name="usertype" required>
-                                        <option value="" disabled selected></option>
-                                        <option value="user">User</option>
-                                        <option value="hr">HR</option>
-                                        <option value="selection board">Selection Board</option>
-                                    </select>
-                                </div>
-                                <x-slot name="footerSlot">
-                                    <button type="submit" class="btn btn-primary text-end">Add</button>
-                                </form>
-                                <x-adminlte-button theme="secondary" label="Cancel" data-dismiss="modal" />
-                            </x-slot>
-                        </x-adminlte-modal>      
-                        @else 
-                            <div class="btn btn-primary my-2" hidden><ion-icon name="person-add"></ion-icon></div>
-                        @endif
-                    </div>
-                </div>
             </div>
             <!-- /.card-header -->
             <div class="card-body table-responsive">
@@ -225,7 +187,78 @@
                     {{ $data->links('pagination::bootstrap-5') }}
             </div>
         </div>
-        <!-- /.card -->
+        <div class="card mt-4">
+            <div class="card-header">
+                Other User Type User's Table
+                <div class="card-tools">
+                    <div class="input-group">
+                        {{-- <form action="" class="form-inline">
+                            <input type="text" id="search" name="search" class="form-control form-control-sm float-right" placeholder="Search">
+                            <div class="input-group-append">
+                                <button type="submit" class="btn btn-default btn-sm mr-2">
+                                    <i class="fas fa-search"></i>
+                                </button>
+                            </div>
+                        </form> --}}
+                        @if(auth()->user()->usertype == 'admin' || auth()->user()->usertype != 'hr')
+                        <x-adminlte-button class="btn btn-sm" id="btnView" label="Add User" icon="fas fa-solid fa-user-plus" theme="primary" data-toggle="modal" data-target="#addusermodal" />
+                        <x-adminlte-modal id="addusermodal" title="Add New User">
+                            <form id="addUser" action="{{route('users.store')}}" method="POST">
+                                @csrf
+                                <x-adminlte-input name="name" label="Name" placeholder="Enter name" />
+                                <x-adminlte-input name="email" label="Email" placeholder="Enter email" />
+                                <x-adminlte-input name="password" label="Password" placeholder="Enter password" type="password" />
+                                <div class="form-group">
+                                    <label for="usertype">User Type</label>
+                                    <select class="form-control" id="usertype" name="usertype" required>
+                                        <option value="" disabled selected></option>
+                                        <option value="user">User</option>
+                                        <option value="hr">HR</option>
+                                        <option value="selection board">Selection Board</option>
+                                    </select>
+                                </div>
+                                <x-slot name="footerSlot">
+                                    <button type="submit" class="btn btn-primary text-end">Add</button>
+                                </form>
+                                <x-adminlte-button theme="secondary" label="Cancel" data-dismiss="modal" />
+                            </x-slot>
+                        </x-adminlte-modal>      
+                        @else 
+                            <div class="btn btn-primary my-2" hidden><ion-icon name="person-add"></ion-icon></div>
+                        @endif
+                    </div>
+                </div>
+            </div>
+            <div class="card-body table-responsive p-0">
+                <table class="table table-hover text-nowrap">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>User Type</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach ($otherUsers as $item)
+                        @if (Auth::user()->id != $item->id)
+                            <tr class="text-center">
+                                <td>{{$item->id}}</td>
+                                <td>{{$item->name}}</td>
+                                <td>{{$item->email}}</td>
+                                <td>{{$item->usertype}}</td>
+                                <td>
+                                    <x-adminlte-button id="btnDelete" theme="danger" icon="fas fa-solid fa-trash" label="Delete" data-toggle="modal" data-target="#deleteModal{{ $item->id }}"/>
+                                </td>
+                            </tr>
+                        @else
+                        @endif
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+        </div>
     </div>
 </div>
 @stop

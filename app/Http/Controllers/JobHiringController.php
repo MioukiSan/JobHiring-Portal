@@ -101,19 +101,41 @@ class JobHiringController extends Controller
 
         // Save the new hiring record
         if ($hiring->save()) {
-            // Create and save the new User instance
-            $user = new User();
-            $user->name = $reference;
-            $user->email = $email;
-            $user->address = $password; // This should be properly set according to your User model's schema
-            $user->password = $hashedPassword;
-            $user->usertype = 'guest';
-
-            if ($user->save()) {
-                return redirect()->back()->with('success', 'Hiring and user created successfully');
-            } else {
-                return redirect()->back()->with('error', 'Hiring created but user creation failed');
+            if($validatedData['contract_type'] == 'Permanent') {
+                if($validatedData['job_type'] == 'SRS-1' || $validatedData['job_type'] == 'Entry') {
+                    $user = new User();
+                    $user->name = $reference;
+                    $user->email = $email;
+                    $user->address = $password; // This should be properly set according to your User model's schema
+                    $user->password = $hashedPassword;
+                    $user->usertype = 'guest';
+                    
+                    if ($user->save()) {
+                        return redirect()->back()->with('success', 'Hiring and user created successfully');
+                    } else {
+                        return redirect()->back()->with('error', 'Hiring created but user creation failed');
+                    }
+                } else {
+                }
+            } elseif($validatedData['contract_type'] == 'COS') {
+                if($validatedData['job_type'] == 'SRS-1' || $validatedData['job_type'] == 'Entry') {
+                    $user = new User();
+                    $user->name = $reference;
+                    $user->email = $email;
+                    $user->address = $password; // This should be properly set according to your User model's schema
+                    $user->password = $hashedPassword;
+                    $user->usertype = 'guest';
+                    
+                    if ($user->save()) {
+                        return redirect()->back()->with('success', 'Hiring and user created successfully');
+                    } else {
+                        return redirect()->back()->with('error', 'Hiring created but user creation failed');
+                    }
+                } else {
+                    return redirect()->back()->with('error', 'Something went wrong');
+                }
             }
+            
         } else {
             return redirect()->back()->with('error', 'Something went wrong');
         }

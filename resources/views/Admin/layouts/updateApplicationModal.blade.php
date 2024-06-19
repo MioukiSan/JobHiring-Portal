@@ -32,7 +32,7 @@
                                 $exams = [];
                             }
                             $exams += [
-                                'bei_status' => ['label' => 'Behavioral Event Interview', 'file' => 'bei_file', 'result' => 'bei_status'],
+                                'bei' => ['label' => 'Behavioral Event Interview', 'file' => 'bei_file', 'result' => 'bei'],
                                 'psycho' => ['label' => 'Psychometric Test', 'file' => 'psycho', 'result' => 'psycho_result'],
                                 'final' => ['label' => 'FINAL INTERVIEW', 'file' => null, 'result' => 'final']
                             ];
@@ -44,26 +44,49 @@
                             <div class="col-12">
                                 <p><b><i>{{ $exam['label'] }}</i></b></p>
                             </div>
-                            @if (!empty($applicant[$exam['file']]) || !empty($applicant[$exam['result']]))
-                                <div class="col-6">
-                                    @if($exam['file'])
-                                        <p><b>Exam file:</b></p>
-                                    @endif
-                                    <p><b> Result:</b></p>
-                                </div>
-                                <div class="col-6">
-                                    @if($exam['file'])
-                                        <p><a href="{{ asset('storage/' . $applicant[$exam['file']]) }}" target="_blank">Exam File</a></p>
-                                    @endif
-                                    <p class="{{ $applicant[$exam['result']] === 'Failed' ? 'text-danger' : ($applicant[$exam['result']] === 'Passed' ? 'text-success' : '') }}">
-                                        {{ $applicant[$exam['result']] }}
-                                    </p>
-                                </div>
+                            @if (!($key == 'bei' || $key == 'initial'))
+                                @if (!empty($applicant[$exam['file']]) || !empty($applicant[$exam['result']]))
+                                    <div class="col-6">
+                                        @if($exam['file'])
+                                            <p><b>Exam file:</b></p>
+                                        @endif
+                                        <p><b> Result:</b></p>
+                                    </div>
+                                    <div class="col-6">
+                                        @if($exam['file'])
+                                            <p><a href="{{ asset('storage/' . $applicant[$exam['file']]) }}" target="_blank">Exam File</a></p>
+                                        @endif
+                                        <p class="{{ $applicant[$exam['result']] === 'Failed' ? 'text-danger' : ($applicant[$exam['result']] === 'Passed' ? 'text-success' : '') }}">
+                                            {{ $applicant[$exam['result']] }}
+                                        </p>
+                                    </div>
+                                @else
+                                    <div class="col-12">
+                                        <p>Not yet Updated</p>
+                                    </div>
+                                @endif
                             @else
-                                <div class="col-12">
-                                    <p>Not yet Updated</p>
-                                </div>
-                            @endif
+                                @if (!empty($applicant[$exam['result']]))
+                                    <div class="col-6">
+                                        @if ($applicant['applicantId'] != NULL)
+                                            <p><b>Exam file:</b></p>
+                                        @endif
+                                        <p><b> Result:</b></p>
+                                    </div>
+                                    <div class="col-6">
+                                    @if ($applicant['applicantId'] != NULL)
+                                        <a href="{{route('generateBEI', ['applicantID' => $applicant['applicant_id']])}}" target="_blank">View BEI</a>
+                                    @endif
+                                        <p class="{{ $applicant[$exam['result']] === 'Failed' ? 'text-danger' : ($applicant[$exam['result']] === 'Passed' ? 'text-success' : '') }}">
+                                            {{ $applicant[$exam['result']] }}
+                                        </p>
+                                    </div>
+                                    @else
+                                        <div class="col-12">
+                                            <p>Not yet Updated</p>
+                                        </div>
+                                    @endif
+                                @endif
                         @endforeach
                     </div>
                 </div>
@@ -176,10 +199,6 @@
                                     <form action="{{route('application.updateApplicant', ['for' => 'Intial Interview', 'applicant_id' => $applicant['applicant_id']])}}" method="POST" enctype="multipart/form-data">
                                             @csrf
                                             <div class="form-group">
-                                                <label for="InitialFile" class="form-label">Initial Interview File</label>
-                                                <input type="file" class="form-control-file border p-1" name="InitialFile">
-                                            </div>
-                                            <div class="form-group">
                                                 <label for="InitialResult" class="form-label">Exam Result</label>
                                                 <select name="InitialResult" class="form-control">
                                                     <option value="" disabled selected>Choose Exam Result</option>
@@ -206,7 +225,7 @@
                                             </div>
                                         </div>
                                     @else
-                                        <form action="{{route('application.updateApplicant', ['for' => 'Final Interview', 'applicant_id' => $applicant['applicant_id']])}}" method="POST" enctype="multipart/form-data">
+                                        <form action="{{route('application.updateApplicant', ['for' => 'Final Interview', 'applicant_id' => $applicant['applicant_id'], 'hiringID' =>$hiring_id])}}" method="POST" enctype="multipart/form-data">
                                             @csrf
                                             <div class="form-group">
                                                 <label for="FinalResult" class="form-label">Exam Result</label>
@@ -223,14 +242,20 @@
                                     @endif
                                 </div>
                                 <div class="tab-pane fade" id="vert-tabs-bei-exam" role="tabpanel" aria-labelledby="vert-tabs-bei-exam-tab">
-                                    @if (!empty($applicant['bei_status']))
+                                    @if (!empty($applicant['bei']))
                                         <div class="row">
                                             <div class="col-6">
-                                                <p><b>Result:</b></p>
+                                                @if ($applicant['applicantId'] != NULL)
+                                                    <p><b>Result:</b></p>
+                                                @endif
+                                                    <p><b>Result:</b></p>
                                             </div>
                                             <div class="col-6">
-                                                <p class="{{ $applicant['bei_status'] === 'Failed' ? 'text-danger' : ($applicant['bei_status'] === 'Passed' ? 'text-success' : '') }}">
-                                                    {{ $applicant['bei_status'] }}
+                                                @if ($applicant['applicantId'] != NULL)
+                                                    <a href="{{route('generateBEI', ['applicantID' => $applicant['applicant_id']])}}" target="_blank">View BEI</a>
+                                                @endif
+                                                <p class="{{ $applicant['bei'] === 'Failed' ? 'text-danger' : ($applicant['bei'] === 'Passed' ? 'text-success' : '') }}">
+                                                    {{ $applicant['bei'] }}
                                                 </p>
                                             </div>
                                         </div>
@@ -266,7 +291,7 @@
                                             </div>
                                         </div>
                                     @else
-                                        <form action="{{route('application.updateApplicant', ['for' => 'Pre-Employment'])}}" method="POST" enctype="multipart/form-data">
+                                        <form action="{{route('application.updateApplicant', ['for' => 'Psychometric Test', 'applicant_id' => $applicant['applicant_id']])}}" method="POST" enctype="multipart/form-data">
                                             @csrf
                                             <div class="form-group">
                                                 <label for="PsychoFile" class="form-label">Psychometric Test File</label>

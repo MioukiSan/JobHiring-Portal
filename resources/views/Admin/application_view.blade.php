@@ -206,12 +206,16 @@
                                                     @endif
                                                 </td>
                                                 <td>
-                                                @if (!empty($applicant['initial_result']))
-                                                <p class="{{ $applicant['initial_result'] === 'Failed' ? 'text-danger' : ($applicant['initial_result'] === 'Passed' ? 'text-success' : '') }}">
-                                                    {{$applicant['initial_result']}}
-                                                </p>
-                                                    <a href="{{ asset('storage/' . $applicant['initial']) }}" target="_blank">Interview File</a>
-                                                @endif
+                                                    @if ($applicant['application_status'] != 'Failed')
+                                                        @if (!empty($applicant['initial_result']))
+                                                            <p class="{{ $applicant['initial_result'] === 'Failed' ? 'text-danger' : ($applicant['initial_result'] === 'Passed' ? 'text-success' : '') }}">
+                                                                {{ $applicant['initial_result'] }}
+                                                            </p>
+                                                        @endif
+                                                        @if ($applicant['applicantId'] != NULL)
+                                                            <a href="{{route('generateBEI', ['applicantID' => $applicant['applicant_id']])}}" target="_blank">View BEI</a>
+                                                        @endif
+                                                    @endif
                                                 </td>                                                  
                                                 <td>
                                                     {{$applicant['final']}}
@@ -259,7 +263,9 @@
                                                 <td>{{ $applicant['user_name'] }}</td>
                                                 @if (Auth::user()->usertype === 'admin' || Auth::user()->usertype === 'hr' )
                                                     <td>
-                                                        {{ $applicant['application_status'] }}
+                                                        <p class="{{ $applicant['application_status'] === 'Failed' ? 'text-danger' : ($applicant['application_status'] === 'Passed' ? 'text-success' : '') }}">
+                                                            {{ $applicant['application_status'] }}
+                                                        </p>
                                                     </td>
                                                 @else
                                                 @endif
@@ -301,12 +307,16 @@
                                                 </td>
                                                 <td>
                                                 @if (!empty($applicant['psycho_result']))
-                                                    {{ $applicant['psycho_result'] }}
+                                                    <p class="{{ $applicant['psycho_result'] === 'Failed' ? 'text-danger' : ($applicant['psycho_result'] === 'Passed' ? 'text-success' : '') }}">
+                                                        {{ $applicant['psycho_result'] }}
+                                                    </p> 
                                                     <a href="{{ asset('storage/' . $applicant['psycho']) }}" target="_blank">Exam File</a>
                                                 @endif
                                                 </td>                                                  
                                                 <td>
-                                                    {{$applicant['final']}}
+                                                    <p class="{{ $applicant['final'] === 'Failed' ? 'text-danger' : ($applicant['final'] === 'Passed' ? 'text-success' : '') }}">
+                                                        {{$applicant['final']}}
+                                                    </p> 
                                                 </td>
                                                 <td>
                                                    @include('Admin.layouts.applicationModal')                    

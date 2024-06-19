@@ -17,7 +17,7 @@ class UserTableController extends Controller
         $data = DB::table("users")
             ->leftJoin("requirements", "users.id", "=", "requirements.user_id")
             ->select("users.*", "requirements.csc_form", "requirements.tor_diploma", "requirements.training_cert", "requirements.eligibility")
-            ->whereIn('usertype', ['user', 'selection_board', 'guest'])
+            ->where('usertype', 'user')
             ->paginate(5);
 
         foreach ($data as $user) {
@@ -29,7 +29,17 @@ class UserTableController extends Controller
             // Add more fields as necessary
             $user->progress = $progress;
         }
-        return view("Admin.user", compact("data"));
+
+        $otherUsers = User::select('id', 'name', 'email', 'usertype')
+            ->whereIn('usertype', ['hr', 'selection board', 'guest'])
+            ->get();
+        
+        $data = [
+            "data" => $data,
+            "otherUsers" => $otherUsers,
+        ];
+
+        return view("Admin.user", $data);
     }
 
     // public function search(Request $request)

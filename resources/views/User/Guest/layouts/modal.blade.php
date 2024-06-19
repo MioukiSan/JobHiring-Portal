@@ -1,6 +1,6 @@
 @if ($hiring_status == 'Closed')
 <!-- Button trigger modal -->
-<button type="button" class="btn text-light btn-sm float-end" class="btn btn-sm text-light float-end" style="background-color: #000789;"  data-bs-toggle="modal" data-bs-target="#shortlistingModal" title="Confirm and Reject Applicants">
+<button type="button" class="btn btn-sm text-light float-end" style="background-color: #000789;"  data-bs-toggle="modal" data-bs-target="#shortlistingModal" title="Confirm and Reject Applicants">
     Shortlist Applicants
   </button>
   <div class="modal fade" id="shortlistingModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
@@ -39,7 +39,7 @@
       </div>
     </div>
   </div>
-  @elseif ($hiring_status == 'Final Shortlisting')
+  @elseif ($hiring_status == 'Competency Exam')
   <button type="button" class="btn text-light btn-sm float-end" class="btn btn-sm text-light float-end" style="background-color: #000789;"  data-bs-toggle="modal" data-bs-target="#shortlistingModal" title="Confirm and Reject Applicants">
     Final Shortlist Applicants
   </button>
@@ -79,8 +79,6 @@
       </div>
     </div>
   </div>
-  @elseif ($hiring_status == 'Initial Interview')
-  <a href="{{ route('initialInterview', ['hiringID' => $hiring_id]) }}" class="btn btn-sm float-end btn-primary">Initial Interview</a>
 @endif
 <script>
     document.addEventListener('DOMContentLoaded', function() {

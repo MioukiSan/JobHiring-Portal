@@ -27,13 +27,13 @@ Route::middleware('auth')->group(function () {
 
     // Routes accessible for Selection Board
     Route::get('BEIUpdate', [ApplicationController::class, 'IndividualBEI'])->name('IndividualBEI');
+    Route::get('BEIUpdateGuest', [ApplicationController::class, 'IndividualBEIGuest'])->name('IndividualBEIGuest');
     Route::post('UploadBEI', [ApplicationController::class, 'UploadBEI'])->name('UploadBEI');
 
     // Routes accessible by all authenticated users
     Route::resource("applicants", ApplicationController::class);
     Route::get('BeiPDF', [ApplicationController::class, 'generateBEI'])->name('generateBEI');
     Route::post('upload', [ApplicationController::class, 'updateApplicant'])->name('application.updateApplicant');
-    Route::get('initial-interview', [ApplicationController::class, 'initialInterview'])->name('initialInterview');
     Route::post('shortlist', [ApplicationController::class, 'shortlistHR'])->name('applicants.shortlist');
     
 

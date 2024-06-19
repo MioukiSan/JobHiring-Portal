@@ -322,23 +322,14 @@ class ApplicationController extends Controller
         }elseif($Purpose == 'Initial Interview'){
             // Step 3: Perform validation on the incoming data
             $validatedData = $request->validate([
-                'InitialFile' => 'required|file|mimes:pdf|max:2048',
                 'InitialResult' => 'required|in:Passed,Failed',
             ]);
-    
-            // Handle pre-employment file upload
-            if ($request->hasFile('InitialFile')) {
-                $file = $request->file('InitialFile');
-                $path = $file->store('exam_results_file', 'public');
-                $validatedData['initial_interview'] = $path;
-            }
     
             // Update pre-employment information in the database
             $affected = DB::table('applicants')
                 ->where('id', $ApplicantID)
                 ->update([
-                    'initial_interview' => $validatedData['initial_interview'],
-                    'initial_interview_result' => $request->InitialResult,
+                    'initial_interview' => $request->InitialResult,
                 ]);
     
             if($affected){
@@ -346,7 +337,35 @@ class ApplicationController extends Controller
             } else {
                 return redirect()->back()->with('error', 'Failed to update applicant.');
             }
+        }elseif($Purpose == 'Psychometric Test'){
+            // Step 3: Perform validation on the incoming data
+            $validatedData = $request->validate([
+                'PsychoFile' => 'required|file|mimes:pdf|max:2048',
+                'PsychoResult' => 'required|in:Passed,Failed',
+            ]);
+            
+            // Handle pre-employment file upload
+            if ($request->hasFile('PsychoFile')) {
+                $file = $request->file('PsychoFile');
+                $path = $file->store('exam_results_file', 'public');
+                $validatedData['psycho_testPath'] = $path;
+            }
+            
+            // Update pre-employment information in the database
+            $affected = DB::table('applicants')
+                ->where('id', $ApplicantID)
+                ->update([
+                    'psycho_test' => $validatedData['psycho_testPath'],
+                    'psycho_test_result' => $request->PsychoResult,
+                ]);
+            
+            if($affected){
+                return redirect()->back()->with('success', 'Applicant updated successfully.');
+            } else {
+                return redirect()->back()->with('error', 'Failed to update applicant.');
+            }            
         }elseif ($Purpose == 'Final Interview') {
+            $id = $request->hiringID;
             // Step 3: Perform validation on the incoming data
             $affected = DB::table('applicants')
                 ->where('id', $ApplicantID)
@@ -356,6 +375,27 @@ class ApplicationController extends Controller
         
             if ($affected) {
                 if ($request->FinalResult === 'Passed') {
+                    $applicantsPassed = Applicant::select('id')
+                        ->where('hiring_id', $id)
+                        ->where('application_status', 'Passed')
+                        ->where('id', '!=', $ApplicantID)
+                        ->get();
+                    
+                    foreach ($applicantsPassed as $applicantPass) {
+                        Applicant::where('id', $applicantPass->id)
+                            ->update([
+                                'application_status' => 'Failed',
+                            ]);
+                            $message = 'This notification is to inform you that your final interview was outstanding for the '. $applicant->hiring->job_position . ', but some applicant surpass your performance. Thank you!';
+                            Notification::create([
+                                'sender_id' => NULL,
+                                'receiver_id' => $applicant,
+                                'message' => $message,
+                                'status' => 'unread',
+                                'type' => 'update',
+                            ]);
+                        }
+
                     $message = 'This notification is to inform you that you have passed the final interview for '. $applicant->hiring->job_position . '. Please wait for our call or mail. Thank you!';
                     Notification::create([
                         'sender_id' => NULL,
@@ -395,6 +435,7 @@ class ApplicationController extends Controller
             }
         }
     }    
+    
     
     public function IndividualBEI(Request $request){
         $id = $request->applicantID;
@@ -463,14 +504,82 @@ class ApplicationController extends Controller
         }
         
         //check if there is an occuring BEI for the applicant 
-        return view('Admin.addBEI', $data);
+        return view('User.Guest.layouts.addBEIGuest', $data);
+    }
+    public function IndividualBEIGuest(Request $request){
+        $id = $request->applicantID;
+        $fetchInfo = Applicant::with(['user', 'hiring', 'SalaryGrade'])
+        ->where('id', $id)
+        ->first();
+
+        $competenciesSG1to6 = [
+                ['name' => 'DEPENDABILITY', 'labelDB' => 'dependability'],
+                ['name' => 'CREATIVE & INNOVATIVE THINKING', 'labelDB' => 'creative'],
+                ['name' => 'INITIATIVE', 'labelDB' => 'initiative'],
+                ['name' => 'TIME MANAGEMENT', 'labelDB' => 'time_management'],
+                ['name' => 'PLANNING & ORGANIZING', 'labelDB' => 'planning']
+            ];
+        
+            $competenciesSG9to16 = [
+                ['name' => 'DEPENDABILITY', 'labelDB' => 'dependability'],
+                ['name' => 'ADAPTABILITY', 'labelDB' => 'adaptability'],
+                ['name' => 'CREATIVE & INNOVATIVE THINKING', 'labelDB' => 'creative'],
+                ['name' => 'TEAMWORK', 'labelDB' => 'teamwork'],
+                ['name' => 'SELF MANAGEMENT', 'labelDB' => 'self_management'],
+                ['name' => 'ORGANIZATIONAL AWARENESS', 'labelDB' => 'org_awareness'],
+                ['name' => 'COMMUNICATION', 'labelDB' => 'communication'],
+                ['name' => 'INITIATIVE', 'labelDB' => 'initiative'],
+                ['name' => 'SERVICE DELIVERY', 'labelDB' => 'service_delivery'],
+                ['name' => 'CUSTOMER FOCUS', 'labelDB' => 'customer_focus']
+            ];
+        
+            $competenciesSG18to24 = [
+                ['name' => 'CREATIVE & INNOVATIVE THINKING', 'labelDB' => 'creative'],
+                ['name' => 'TEAMWORK', 'labelDB' => 'teamwork'],
+                ['name' => 'SELF MANAGEMENT', 'labelDB' => 'self_management'],
+                ['name' => 'MANAGING PROJECTS OR PROGRAMS', 'labelDB' => 'management'],
+                ['name' => 'STAFF MANAGEMENT', 'labelDB' => 'staff_management'],
+                ['name' => 'ORGANIZATIONAL AWARENESS', 'labelDB' => 'org_awareness'],
+                ['name' => 'STRATEGIC PLANNING', 'labelDB' => 'strategic_planning'],
+                ['name' => 'MONITORING AND EVALUATING', 'labelDB' => 'monitor_evaluation'],
+                ['name' => 'PLANNING, ORGANISING & DELIVERY', 'labelDB' => 'planning'],
+                ['name' => 'SERVICE DELIVERY', 'labelDB' => 'service_delivery']
+            ];
+        
+            $leadershipCompetencies = [
+                ['name' => 'THINKING STRATEGICALLY & CREATIVELY', 'labelDB' => 'strategy_creatively'],
+                ['name' => 'LEADING CHANGE', 'labelDB' => 'leading_change'],
+                ['name' => 'BUILDING COLLABORATIVE INCLUSIVE WORKING RELATIONSHIPS', 'labelDB' => 'building_relationship'],
+                ['name' => 'MANAGING PERFORMANCE AND COACHING FOR RESULTS', 'labelDB' => 'coaching'],
+                ['name' => 'CREATING & NURTURING A HIGH PERFORMING ORGANISATION', 'labelDB' => 'create_nurture_performance']
+            ];
+            
+        $data = [
+            'salaryGrade' => $fetchInfo->hiring->salary_grade,
+            'jobTitle' => $fetchInfo->hiring->job_position,
+            'name' => $fetchInfo->user->name,
+            'applicantID' => $id,
+            'hiringID' => $fetchInfo->hiring->id,
+            'leadershipCompetencies' => NULL,
+        ];
+
+        if ($fetchInfo->hiring->salary_grade >= 1 && $fetchInfo->hiring->salary_grade <= 8) {
+            $data['competencies'] = $competenciesSG1to6;
+        } elseif ($fetchInfo->hiring->salary_grade >= 9 && $fetchInfo->hiring->salary_grade <= 17) {
+            $data['competencies'] = $competenciesSG9to16;
+        } elseif ($fetchInfo->hiring->salary_grade >= 18 && $fetchInfo->hiring->salary_grade <= 24) {
+            $data['competencies'] = $competenciesSG18to24;
+            $data['leadershipCompetencies'] = $leadershipCompetencies;
+        }
+        
+        //check if there is an occuring BEI for the applicant 
+        return view('User.Guest.layouts.addBEIGuest', $data);
     }
     
     public function UploadBEI(Request $request){
         $applicantID = $request->applicationID;
         $hiringID = $request->hiringID;
 
-        dd($request->all());
         $salaryGrade = $request->salaryGrade;
         if($salaryGrade >= 1 && $salaryGrade <= 8){
             $data = [

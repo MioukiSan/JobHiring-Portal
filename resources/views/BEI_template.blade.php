@@ -68,6 +68,15 @@
                                         <tr>
                                             <td>{{ $competency['label'] }}</td>
                                             @foreach ($competency['data'] as $item)
+                                            {{-- @php
+                                            $totalRating = 0;
+                                            $totalCount = 0;
+                                            
+                                                if (is_numeric($competency['data'])) {
+                                                    $totalRating += intval($competency['data']);
+                                                    $totalCount++;
+                                                }
+                                            @endphp --}}
                                                 <td>{{ $item }}</td>
                                             @endforeach
                                         </tr>

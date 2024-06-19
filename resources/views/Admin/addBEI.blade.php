@@ -29,7 +29,7 @@
                                     <div class="input-group-prepend">
                                         <span class="input-group-text">Rating</span>
                                     </div>
-                                    <input type="number" name="{{$item['labelDB']}}_rate" class="form-control" placeholder="Rate from 1 to 10" max="10" min="0" >
+                                    <input type="number" name="{{$item['labelDB']}}_rate" class="form-control" placeholder="Rate from 1 to 10" max="10" min="0" required>
                                 </div>
                             </div>
                             <div class="col-12 mb-3">
@@ -37,19 +37,19 @@
                                     <div class="col-4">
                                         <div class="form-group">
                                             <label>SITUATION OR TASK/S</label>
-                                            <textarea name="{{$item['labelDB']}}_situation" class="form-control" rows="3" placeholder="Enter situation or task." ></textarea>
+                                            <textarea name="{{$item['labelDB']}}_situation" class="form-control" rows="3" placeholder="Enter situation or task." required></textarea>
                                         </div>
                                     </div>
                                     <div class="col-4">
                                         <div class="form-group">
                                             <label>ACTION/S</label>
-                                            <textarea class="form-control" name="{{$item['labelDB']}}_action" rows="3" placeholder="Enter action taken by the applicant." ></textarea>
+                                            <textarea class="form-control" name="{{$item['labelDB']}}_action" rows="3" placeholder="Enter action taken by the applicant." required></textarea>
                                         </div>
                                     </div>
                                     <div class="col-4">
                                         <div class="form-group">
                                             <label>RESULT/S</label>
-                                            <textarea class="form-control" name="{{$item['labelDB']}}_result" rows="3" placeholder="Enter the result of the action." ></textarea>
+                                            <textarea class="form-control" name="{{$item['labelDB']}}_result" rows="3" placeholder="Enter the result of the action." required></textarea>
                                         </div>
                                     </div>
                                 </div>
@@ -64,7 +64,7 @@
                                 <div class="input-group-prepend">
                                     <span class="input-group-text">Rating</span>
                                 </div>
-                                <input type="number" name="{{$item['labelDB']}}_rate" class="form-control" placeholder="Rate from 1 to 10" max="10" min="0" >
+                                <input type="number" name="{{$item['labelDB']}}_rate" class="form-control" placeholder="Rate from 1 to 10" max="10" min="0" required>
                             </div>
                         </div>
                         <div class="col-12 mb-3">
@@ -72,19 +72,19 @@
                                 <div class="col-4">
                                     <div class="form-group">
                                         <label>SITUATION OR TASK/S</label>
-                                        <textarea name="{{$item['labelDB']}}_situation" class="form-control" rows="3" placeholder="Enter situation or task." ></textarea>
+                                        <textarea name="{{$item['labelDB']}}_situation" class="form-control" rows="3" placeholder="Enter situation or task." required></textarea>
                                     </div>
                                 </div>
                                 <div class="col-4">
                                     <div class="form-group">
                                         <label>ACTION/S</label>
-                                        <textarea class="form-control" name="{{$item['labelDB']}}_action" rows="3" placeholder="Enter action taken by the applicant." ></textarea>
+                                        <textarea class="form-control" name="{{$item['labelDB']}}_action" rows="3" placeholder="Enter action taken by the applicant." required></textarea>
                                     </div>
                                 </div>
                                 <div class="col-4">
                                     <div class="form-group">
                                         <label>RESULT/S</label>
-                                        <textarea class="form-control" name="{{$item['labelDB']}}_result" rows="3" placeholder="Enter the result of the action." ></textarea>
+                                        <textarea class="form-control" name="{{$item['labelDB']}}_result" rows="3" placeholder="Enter the result of the action." required></textarea>
                                     </div>
                                 </div>
                             </div>
