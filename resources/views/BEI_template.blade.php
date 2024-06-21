@@ -50,12 +50,11 @@
                     <table class="table">
                         <thead>
                             <tr class="text-center">
-                                <th>COMPETENCIES</th>
-                                <th>RATING</th>
+                                <th rowspan="2">COMPETENCIES</th>
+                                <th rowspan="2">RATING</th>
                                 <th colspan="3">DOCUMENTATION NOTES</th>
                             </tr>
                             <tr class="tr-custom text-center">
-                                <th colspan="2"></th>
                                 <th>SITUATION OR TASK/S</th>
                                 <th>ACTION/S</th>
                                 <th>RESULT/S</th>

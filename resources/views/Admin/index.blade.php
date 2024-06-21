@@ -23,7 +23,7 @@
                     <div class="icon">
                       <i class="fas fa-briefcase "></i>
                     </div>
-                    <a href="#" class="small-box-footer">
+                    <a href="{{route('hirings.index')}}" class="small-box-footer">
                       More info <i class="fas fa-arrow-circle-right"></i>
                     </a>
                   </div>
@@ -32,12 +32,12 @@
                   <div class="small-box bg-success">
                     <div class="inner">
                       <h3>{{$applicantsCount}}</h3>
-                      <p>Applicants</p>
+                      <p>Applications</p>
                     </div>
                     <div class="icon">
                       <i class="fas fa-file"></i>
                     </div>
-                    <a href="#" class="small-box-footer">
+                    <a href="{{route('applicants.index')}}" class="small-box-footer">
                       More info <i class="fas fa-arrow-circle-right"></i>
                     </a>
                   </div>
@@ -52,7 +52,7 @@
                     <div class="icon">
                       <i class="fas fa-users"></i>
                     </div>
-                    <a href="#" class="small-box-footer">
+                    <a href="{{route('users.index')}}" class="small-box-footer">
                       More info <i class="fas fa-arrow-circle-right"></i>
                     </a>
                   </div>
@@ -66,7 +66,7 @@
                     <div class="icon">
                       <i class="fas fa-box-archive"></i>
                     </div>
-                    <a href="#" class="small-box-footer">
+                    <a href="{{route('hirings.index')}}" class="small-box-footer">
                       Archived Hiring <i class="fas fa-arrow-circle-right"></i>
                     </a>
                   </div>
@@ -130,6 +130,7 @@
                       center: "title",
                       right: "dayGridMonth,timeGridWeek,listMonth"
                   },
+                  height: 600,
                   events: data,
                   editable: false,
                   droppable: false,

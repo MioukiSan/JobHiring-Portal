@@ -47,19 +47,24 @@ class Authenticate extends Middleware
                 'BEIUpdateGuest',
                 'BEIUpdate',
                 'UploadBEI',
+                'shortlistApplicants*',
             ];
 
             $userRoutes = [
                 'apply-process*',
                 'apply*',
                 'cancel-application*',
-                'shortlistApplicants*',
                 'upload-requirement*',
                 'store-requirement*',
                 'profile*',
                 'notifications/getUser',
                 'markAsRead',
                 'BeiPDF',
+                'user-schedule',
+                'change-password',
+                'deleteAccount',
+                'verificationSent',
+                'AccountVerification',
             ];
 
             // Check user type constraints

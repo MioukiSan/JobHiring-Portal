@@ -7,6 +7,7 @@ use App\Models\Applicant;
 use App\Models\SalaryGrade;
 use App\Models\Notification;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
@@ -22,6 +23,7 @@ class ApplicationController extends Controller
         // Base query for applicants with left joins to hirings and users
         $hiringsOpen = Hiring::with('applicants.user')
             ->where('job_status', '!=' ,'Archived')
+            ->orderBy('created_at', 'desc')
             ->get();
 
         // Prepare the data for the view
@@ -55,6 +57,7 @@ class ApplicationController extends Controller
         );
         $hiringsClosed = Hiring::with('applicants.user')
             ->where('job_status', 'Archived')
+            ->orderBy('created_at', 'desc')
             ->get();
 
         // Prepare the data for the view
@@ -93,7 +96,7 @@ class ApplicationController extends Controller
     public function viewApplications(Request $request)
     {
         $id = $request->hiringID;
-
+        $dateToday = Carbon::now()->format('Y-m-d');
         // Fetch hiring details with applicants and user requirements
         $hiring = Hiring::with(['applicants.SalaryGrade', 'applicants.user.requirement'])
                         ->where('id', $id)
@@ -214,8 +217,9 @@ class ApplicationController extends Controller
             'created_at' => $hiring->created_at,
             'closing' => $hiring->closing,
             'applicants' => $applicants,
+            'date' => $dateToday,
         ];
-
+        
         // Determine the view based on user type
         if (Auth::user()->usertype === 'guest') {
             return view('User.Guest.joboverview', $data);
@@ -227,35 +231,64 @@ class ApplicationController extends Controller
 
     public function guestSelectQualified(Request $request)
     {
-
         $hiringID = $request->hiringID;
-        $statusHiring = Hiring::select('job_status')->where('id', $hiringID)->get();
+        $job = Hiring::select('job_status', 'job_position')->where('id', $hiringID)->first();
         $selectedIds = $request->applicantSelected;
         $allApplicantIds = Applicant::where('hiring_id', $hiringID)->pluck('id');
-        $notSelectedIds = $allApplicantIds->diff($selectedIds);
+        $notSelectedIds = $allApplicantIds->diff($selectedIds ?? []);
 
-        if($selectedIds === NULL){
-            Applicant::whereIn('id', $notSelectedIds)->update(['application_status' => 'Failed']);
-            $updateStatus = Hiring::find($hiringID);
-            $updateStatus->job_status = ($statusHiring === 'Closed') ? 'Competency Exam' : 'Initial Interview';
-            if($updateStatus->save()){
-                return redirect()->back()->with('info', 'Applicants updated successfully.');
-            } else {
-                return redirect()->back()->with('danger', 'Applicants updated unsuccessfully.');
-            }
-        } else {
-            Applicant::whereIn('id', $notSelectedIds)->update(['application_status' => 'Failed']);
+        // Update application statuses for not selected applicants
+        Applicant::whereIn('id', $notSelectedIds)->update(['application_status' => 'Failed']);
+        if ($selectedIds !== NULL) {
+            // Update application statuses for selected applicants
             Applicant::whereIn('id', $selectedIds)->update(['application_status' => 'Passed']);
-            $updateStatus = Hiring::find($hiringID);
-            $updateStatus->job_status = ($statusHiring === 'Closed') ? 'Competency Exam' : 'Initial Interview';
-            if($updateStatus->save()){
-                return redirect()->back()->with('info', 'Applicants updated successfully.');
-            } else {
-                return redirect()->back()->with('danger', 'Applicants updated unsuccessfully.');
+        }
+
+        // Update job status based on the current status
+        $updateStatus = Hiring::find($hiringID);
+        switch ($job->job_status) {
+            case 'Closed':
+                $updateStatus->job_status = 'Competency Exam';
+                break;
+            case 'Competency Exam':
+                $updateStatus->job_status = 'Pre-Employment Exam';
+                break;
+            case 'Pre-Employment Exam':
+                $updateStatus->job_status = 'Initial Interview';
+                break;
+        }
+
+        if ($updateStatus->save()) {
+            // Create notifications for not selected applicants
+            $notSelectedMessage = 'Thank you for your interest in' . $job->job_position . ', but sadly you cannot advance to the ' . $updateStatus->job_status . ' stage of the process. Maybe you should consider applying again in the future.';
+            foreach ($notSelectedIds as $id) {
+                Notification::create([
+                    'user_id' => $id,
+                    'type' => 'update',
+                    'message' => $notSelectedMessage,
+                    'status' => 'unread',
+                ]);
             }
+
+            // Create notifications for selected applicants if any
+            if ($selectedIds !== NULL) {
+                $selectedMessage = 'Thank you for your interest, your application for the job ' . $job->job_position . ' has advanced to the ' . $updateStatus->job_status . ' stage of the process. Please wait for further instructions.';
+                foreach ($selectedIds as $id) {
+                    Notification::create([
+                        'user_id' => $id,
+                        'type' => 'update',
+                        'message' => $selectedMessage,
+                        'status' => 'unread',
+                    ]);
+                }
+            }
+
+            return redirect()->back()->with('info', 'Applicants updated successfully.');
+        } else {
+            return redirect()->back()->with('danger', 'Applicants updated unsuccessfully.');
         }
     }
-    
+
     public function updateApplicant(Request $request){
         $Purpose = $request->for;
         $ApplicantID = $request->applicant_id;
@@ -267,7 +300,7 @@ class ApplicationController extends Controller
         if($Purpose == 'Competency'){
             // Step 3: Perform validation on the incoming data
             $validatedData = $request->validate([
-                'competency File' => 'required|file|mimes:pdf|max:2048',
+                'competencyFile' => 'required|file|mimes:pdf|max:2048',
                 'CompetencyResult' => 'required|in:Passed,Failed',
             ]);
     
@@ -375,21 +408,22 @@ class ApplicationController extends Controller
         
             if ($affected) {
                 if ($request->FinalResult === 'Passed') {
-                    $applicantsPassed = Applicant::select('id')
+                    $applicantsFailed = Applicant::select('id')
                         ->where('hiring_id', $id)
                         ->where('application_status', 'Passed')
                         ->where('id', '!=', $ApplicantID)
                         ->get();
-                    
-                    foreach ($applicantsPassed as $applicantPass) {
-                        Applicant::where('id', $applicantPass->id)
+
+                    foreach ($applicantsFailed as $failed) {
+                        Applicant::where('id', $failed->id)
                             ->update([
                                 'application_status' => 'Failed',
+                                'final_interview' => 'Failed',
                             ]);
                             $message = 'This notification is to inform you that your final interview was outstanding for the '. $applicant->hiring->job_position . ', but some applicant surpass your performance. Thank you!';
                             Notification::create([
                                 'sender_id' => NULL,
-                                'receiver_id' => $applicant,
+                                'receiver_id' => $failed->id,
                                 'message' => $message,
                                 'status' => 'unread',
                                 'type' => 'update',
@@ -404,8 +438,6 @@ class ApplicationController extends Controller
                         'status' => 'unread',
                         'type' => 'update',
                     ]);
-                    
-                    
                 } else {
                     $message = 'This notification is to inform you that your final interview was outstanding for the '. $applicant->hiring->job_position . ', but some applicant surpass your performance. Thank you!';
                     Notification::create([
@@ -416,7 +448,15 @@ class ApplicationController extends Controller
                         'type' => 'update',
                     ]);
                 }
-                return redirect()->back()->with('success', 'Applicant updated successfully.');
+                if ($request->FinalResult === 'Passed') {
+                    $changedStatus = Hiring::where('id', $id)
+                        ->update([
+                            'job_status' => 'Archived',
+                        ]);
+                    return redirect()->back()->with('success', 'Applicant updated successfully.');
+                }else{
+                    return redirect()->back()->with('success', 'Applicant updated successfully.');
+                }
             } else {
                 return redirect()->back()->with('error', 'Failed to update applicant.');
             }
@@ -763,7 +803,7 @@ class ApplicationController extends Controller
         $hiringID = $request->hiringID;
         $statusHiring = Hiring::select('job_status')->where('id', $hiringID)->first();
         $typeHiring = Hiring::select('job_type')->where('id', $hiringID)->first();
-        $job = Hiring::select('job_position')->where('id', $hiringID)->first();
+        $job = Hiring::select('job_position')->where('id', $hiringID)->pluck('job_position')->first();
         $selectedIds = $request->applicantSelected;
         $allApplicantIds = Applicant::where('hiring_id', $hiringID)->pluck('id');
         $notSelectedIds = $allApplicantIds->diff($selectedIds);
@@ -773,7 +813,7 @@ class ApplicationController extends Controller
         foreach($notSelectedIds as $not){
             $user_id = Applicant::select('user_id')->where('id', $not)->get();
             $user_id = $user_id[0]['user_id'];
-            $message = "The shortlisting is done for the position " . $job->job_position . "you applied for, and your application did not pass the requirements. Please try again next time.";
+            $message = "The shortlisting is done for the position " . $job . " you applied for, and your application did not pass the requirements. Please try again next time.";
             Notification::create([
                 'sender_id' => Auth::user()->id,
                 'receiver_id' => $user_id,

@@ -45,7 +45,10 @@ Route::middleware('auth')->group(function () {
     Route::post('shortlistApplicants', [ApplicationController::class, 'guestSelectQualified'])->name("selectApplicant");
     Route::get("/upload-requirement", [ApplicationUserController::class, "uploadRequirement"])->name("upload-requirement");
     Route::post("/store-requirement", [ApplicationUserController::class, "storeRequirement"])->name("store-requirement");
-
+    Route::get("user-schedule", [ProfileController::class, "CalendarSchedule"])->name("user-schedule");
+    Route::post('/change-password', [ProfileController::class, 'changePass'])->name('change.password');
+    Route::get('verificationSent', [ProfileController::class, 'sendVerification'])->name('send.verification');
+    Route::post('AccountVerification', [ProfileController::class, 'verifyAccount'])->name('verify.account');
     // Routes accessible by all authenticated users
     Route::get("notifications/get", [NotificationController::class, "getNotificationsData"])->name("notifications.get");
     Route::get("notifications/getUser", [NotificationController::class, "ApplicantsNotif"])->name("NotifUserGet");

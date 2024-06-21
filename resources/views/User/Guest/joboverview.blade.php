@@ -4,6 +4,11 @@
 <div class="container">
     <div class="row">
         <div class="col-lg-12 col-sm-6">
+            @if($errors->any())
+                <div class="alert alert-danger">
+                    {{ implode('', $errors->all('<div>:message</div>')) }}
+                </div>
+            @endif
             <div class="card my-5">
                 <div class="card-header">
                     Hiring & Applicants Details
@@ -79,7 +84,7 @@
                                                 @endif
                                                 <td>
                                                 @if (!empty($applicant['competency']))  
-                                                    <p class="{{ $applicant['competency_result'] === 'Not Selected' ? 'text-danger' : ($applicant['competency_result'] === 'Passed' ? 'text-success' : '') }}">
+                                                    <p class="{{ $applicant['competency_result'] === 'Failed' ? 'text-danger' : ($applicant['competency_result'] === 'Passed' ? 'text-success' : '') }}">
                                                         {{ $applicant['competency_result'] }}
                                                     </p>
                                                     <p>Exam File: <a href="{{ asset('storage/' . $applicant['competency']) }}" target="_blank">View</a></p>
@@ -87,14 +92,14 @@
                                                 </td>
                                                 <td>
                                                     @if (!empty($applicant['pre_result']))  
-                                                    <p class="{{ $applicant['pre_result'] === 'Not Selected' ? 'text-danger' : ($applicant['competency_result'] === 'Passed' ? 'text-success' : '') }}">
+                                                    <p class="{{ $applicant['pre_result'] === 'Failed' ? 'text-danger' : ($applicant['competency_result'] === 'Passed' ? 'text-success' : '') }}">
                                                         {{ $applicant['pre_result'] }}
                                                     </p>
                                                     <p>Exam File: <a href="{{ asset('storage/' . $applicant['pre_employment']) }}" target="_blank">View</a></p>
                                                     @endif
                                                 </td>
                                                 <td>
-                                                    @if ($hiring_status != 'Initial Interview')
+                                                    @if ($hiring_status === 'Initial Interview' && $date === $initial_date)
                                                         @if ($applicant['application_status'] != 'Failed')
                                                             @if (!empty($applicant['initial_result']))
                                                                 <p class="{{ $applicant['initial_result'] === 'Failed' ? 'text-danger' : ($applicant['initial_result'] === 'Passed' ? 'text-success' : '') }}">
@@ -110,7 +115,7 @@
                                                     @endif
                                                 </td>                                                  
                                                 <td>
-                                                    @if ($hiring_status != 'Final Interview')
+                                                    @if ($hiring_status === 'Final Interview' && $date === $final_date)
                                                     <button class="btn" data-bs-toggle="modal" type="button" data-bs-target="#finalModal">Update</button>
                                                     <div class="modal fade" id="finalModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
                                                         <div class="modal-dialog modal-dialog-centered">
@@ -120,12 +125,12 @@
                                                                 </div>
                                                                 <div class="modal-body">
                                                                     <h6><b>NAME: </b>{{$applicant['user_name']}}</h6>
-                                                                    <form action="" method="POST">
+                                                                    <form action="{{route('application.updateApplicant', ['for' => 'Final Interview', 'applicant_id' => $applicant['applicant_id'], 'hiringID' =>$hiring_id])}}" method="POST">
                                                                         @csrf
                                                                         <div class="my-3">
-                                                                            <select class="form-control" name="" id="">Select Result
-                                                                                <option value="">Passed</option>
-                                                                                <option value="">Failed</option>
+                                                                            <select class="form-control" name="FinalResult">Select Result
+                                                                                <option value="Passed">Passed</option>
+                                                                                <option value="Failed">Failed</option>
                                                                             </select>
                                                                         </div>
                                                                         <div class="text-center">

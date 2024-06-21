@@ -9,6 +9,8 @@
     <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
     <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
     <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
+    <link href='https://cdn.jsdelivr.net/npm/fullcalendar@5.10.2/main.min.css' rel='stylesheet' />
+    <script src='https://cdn.jsdelivr.net/npm/fullcalendar@5.10.2/main.min.js'></script>
     @vite(['resources/sass/app.scss', 'resources/js/app.js'])
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" integrity="sha512-vKMx8UnXk60zUwyUnUPM3HbQo8QfmNx7+ltw8Pm5zLusl1XIfwcxo8DbWCqMGKaWeNxWA8yrx5v3SaVpMvR3CA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <script src="https://momentjs.com/downloads/moment.min.js"></script>
@@ -137,4 +139,42 @@
             setInterval(fetchNotifications, 10000);
         });
     </script>
+    <script>
+        $(document).ready(function () {
+            var calendarEl = document.getElementById("calendar");
+      
+            // Fetch events from the backend
+            $.ajax({
+                url: '/user-schedule',
+                method: 'GET',
+                success: function (data) {
+                    // Log the events to the console for debugging
+                    console.log(data);
+      
+                    // Initialize FullCalendar with the fetched events
+                    var calendar = new FullCalendar.Calendar(calendarEl, {
+                        headerToolbar: {
+                            left: "prev,next today",
+                            center: "title",
+                            right: "dayGridMonth,timeGridWeek,listMonth"
+                        },
+                        height: 470,
+                        events: data,
+                        editable: false,
+                        droppable: false,
+                        drop: function (info) {
+                            if (checkbox.checked) {
+                                info.draggedEl.parentNode.removeChild(info.draggedEl);
+                            }
+                        }
+                    });
+      
+                    calendar.render();
+                },
+                error: function (error) {
+                    console.error('Error fetching events:', error);
+                }
+            });
+        });
+      </script>
 </html>
