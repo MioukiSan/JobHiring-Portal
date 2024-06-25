@@ -10,11 +10,28 @@
                         <h1><b>{{$hiring->job_position}}</b></h1>
                     </div>
                     <div class="col-md-5">
-
-                        <a href="{{route('application.applyUpload', [ 'hiringID' => $hiring->id ])}}" class="btn text-light float-end" style="background-color: #000789;">Apply</a>
-                        <button class="btn float-end mx-2" onclick="coyLink('{{ url()->current() }}')">
+                        @if (Auth::user()->title === 'Verified')
+                            <a href="{{route('application.applyUpload', [ 'hiringID' => $hiring->id ])}}" class="btn text-light float-end" style="background-color: #000789;">Apply</a>
+                        @else
+                            <button class="btn text-light float-end" style="background-color: #000789;" type="button" data-bs-toggle="modal" data-bs-target="#verifyAccount">Apply</button>
+                            <div class="modal fade" id="verifyAccount" tabindex="-1" aria-labelledby="verifyAccountLabel" aria-hidden="true">
+                                <div class="modal-dialog">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title" id="verifyAccountLabel">Verify Account</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <p>You need to verify your account before you can apply for a job.</p>
+                                            <a href="{{route('profile.index')}}" class="btn btn-primary">Verify</a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        @endif
+                        {{-- <button class="btn float-end mx-2" onclick="copyLink('{{ url()->current() }}')">
                             <ion-icon size="small" name="share-social-outline" style="color: #000789;"></ion-icon>
-                        </button>
+                        </button> --}}
                     </div>
                 </div>
                 <div style="border-bottom: 2px solid #000789; margin-bottom: 20px;"></div>

@@ -8,26 +8,23 @@
         {{-- @if($errors->any())
     {{ implode('', $errors->all('<div>:message</div>')) }}
 @endif --}}
-        <div class="row mb-3">
-            <div class="col-11">
+        <div class="row mb-3 d-flex justify-content-between">
+            <div class="col-10">
                 <div class="input-group">
                     <form action="{{route('home')}}" method="get">
                         @csrf
-                        <input type="search" name="querySearch" class="form-control shadow-sm" placeholder="Search" value="" onchange="this.form.submit()">
+                        <input type="search" name="querySearch" class="form-control shadow-sm form-control-sm" placeholder="Search" value="" onchange="this.form.submit()">
                     </form>
                 </div>
             </div>
-            <div class="col-1">
-                <div class="dropdown">
-                    <button class="btn shadow-sm" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                        Filter<i class="bi bi-filter"></i>    
-                    </button>
-                    <ul class="dropdown-menu">
-                    <li><a class="dropdown-item" href="#">Action</a></li>
-                    <li><a class="dropdown-item" href="#">Another action</a></li>
-                    <li><a class="dropdown-item" href="#">Something else here</a></li>
-                    </ul>
-                </div>
+            <div class="col-2">
+                <form action="{{route('home')}}" method="GET">
+                    <select name="filter" class="form-select form-select-sm" id="" onchange="this.form.submit()">
+                        <option value="" selected disabled>Filter</option>
+                        <option value="COS">COS</option>
+                        <option value="Permanent">PERMANENT</option>
+                    </select>
+                </form>
             </div>
         </div>
         <div class="row">
@@ -58,7 +55,7 @@
                                             @php 
                                                 $missingDocuments = false;
                                                 foreach($requirements as $requirement) {
-                                                    if ($requirement->csc_form == NULL || $requirement->tor_diploma == NULL || $requirement->training_cert == NULL) {
+                                                    if ($requirement->csc_form == NULL || $requirement->tor_diploma == NULL) {
                                                         $missingDocuments = true;
                                                         break;
                                                     }
@@ -139,7 +136,7 @@
                                                                 <li>TOR/Diploma</li>
                                                             @endif
                                                             @if($requirement->training_cert == NULL)
-                                                                <li>Training Certificate</li>
+                                                                <li>Training Certificate(Not required but if you have upload scanned file.)</li>
                                                             @endif
                                                             @if($requirement->eligibility == NULL)
                                                                 <li>Eligibility(Not required but if you have upload scanned file.)</li>

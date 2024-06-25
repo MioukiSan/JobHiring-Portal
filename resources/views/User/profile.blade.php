@@ -29,9 +29,9 @@
                     <div class="row m-3">
                         <div class="col-12 border-top">
                             <p class="mt-3"><b>Account Status: </b>
-                                @if (Auth::user()->title === NULL)
+                                @if (Auth::user()->account_status === NULL)
                                     <span class="text-warning">Not verfiied<ion-icon name="alert-circle-outline"></ion-icon></span><a href="{{route('send.verification')}}">  verify now</a></p>
-                                @elseif (Auth::user()->title != NULL && Auth::user()->title != 'verified')
+                                @elseif (Auth::user()->account_status != NULL && Auth::user()->title != 'verified')
                                     <span class="text-warning">Verification in Process<ion-icon name="footsteps-outline"></ion-icon></span>
                                         <button class="btn btn-sm" title="Click to enter the code sent to your number." data-bs-toggle="modal" data-bs-target="#verify">Enter Code</button>
                                         <div class="modal fade" id="verify"  tabindex="-1" aria-labelledby="verifyLabel" aria-hidden="true">
@@ -63,7 +63,47 @@
                                 @endif
                             <p><b>Number of Application: {{$countApplication}}</b><span></span></p>
                         </div>
-                        <h5 class="text-success my-1">Personal Information</h5>
+                        <div class="d-flex justify-content-between">
+                            <h5 class="text-success my-1">Personal Information</h5>
+                            <button class="btn btn-sm" data-bs-toggle="modal" data-bs-target="#editPersonalInformation">Edit Data</button>
+                            <div class="modal fade" id="editPersonalInformation" tabindex="-1" aria-labelledby="editPersonalInformationLabel" aria-hidden="true">
+                                <div class="modal-dialog">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title" id="editPersonalInformationLabel">Edit Personal Information</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <form action="{{ route('profile.update', Auth::user()->id) }}" method="POST">
+                                                @csrf
+                                                @method('PUT')
+                                                <div class="form-group mb-3">
+                                                    <label for="name" class="form-label">Full Name</label>
+                                                    <input type="text" class="form-control" id="name" name="name" value="{{ Auth::user()->name }}">
+                                                </div>
+                                                <div class="form-group mb-3">
+                                                    <label for="email" class="form-label">Email</label>
+                                                    <input type="email" class="form-control" id="email" name="email" value="{{ Auth::user()->email }}">
+                                                </div>
+                                                <div class="form-group mb-3">
+                                                    <label for="phone" class="form-label">Phone</label>
+                                                    <input type="text" class="form-control" id="phone" name="number" value="0{{ Auth::user()->number }}">
+                                                    <small class="text-muted">We'll never share your phone with anyone else.</small>
+                                                </div>
+                                                <div class="form-group mb-3">
+                                                    <label for="address" class="form-label">Address</label>
+                                                    <input type="text" class="form-control" id="address" name="address" value="{{ Auth::user()->address }}">
+                                                </div>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                            <button type="submit" class="btn btn-primary">Save changes</button>
+                                            </form>
+                                        </div>                                        
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                         <div class="col-md-12 border-top border-bottom mb-3">
                             <div class="form-group m-4">
                                 <div class="row">
@@ -90,7 +130,65 @@
                                 </div>
                             </div>
                         </div>
-                        <h5 class="text-success my-1">Requirements</h5>
+                        <div class="d-flex justify-content-between">
+                            <h5 class="text-success my-1">Requirements</h5>
+                            <button class="btn btn-sm" type="button" data-bs-toggle="modal" data-bs-target="#Edit">Edit Requirements</button>
+                            <div class="modal fade" id="Edit" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                                <div class="modal-dialog">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title" id="exampleModalLabel">Edit Requirements</h5>
+                                        </div>
+                                        <div class="modal-body">
+                                            <form action="{{ route('store-requirement') }}" method="POST" enctype="multipart/form-data">
+                                                @csrf
+                                                @foreach ($requirements as $requirement)
+                                                    <div class="m-3">
+                                                        <label for="csc_form" class="form-label">CSC Form</label>
+                                                        <input type="file" id="csc_form" name="csc_form" class="form-control">
+                                                        @if (!is_null($requirement->csc_form))
+                                                        <p class="text-muted">View Existing Document
+                                                            <a href="{{ asset('storage/requirements/'. $requirement->csc_form) }}" target="_blank" class="text-sm">View</a>
+                                                        </p>
+                                                        @endif
+                                                    </div>
+                                                    <div class="m-3">
+                                                        <label for="tor_diploma" class="form-label">TOR Diploma</label>
+                                                        <input type="file" id="tor_diploma" name="tor_diploma" class="form-control">
+                                                        @if (!is_null($requirement->tor_diploma))
+                                                        <p class="text-muted">View Existing Document
+                                                            <a href="{{ asset('storage/requirements/'. $requirement->tor_diploma) }}" target="_blank" class="text-sm">View</a>
+                                                        </p>
+                                                        @endif
+                                                    </div>
+                                                    <div class="m-3">
+                                                        <label for="training_cert" class="form-label">Training Certificate</label>
+                                                        <input type="file" id="training_cert" name="training_cert" class="form-control">
+                                                        @if (!is_null($requirement->training_cert))
+                                                        <p class="text-muted">View Existing Document
+                                                            <a href="{{ asset('storage/requirements/'. $requirement->training_cert) }}" target="_blank" class="text-sm">View</a>
+                                                        </p>
+                                                        @endif
+                                                    </div>
+                                                    <div class="m-3">
+                                                        <label for="eligibility" class="form-label">Eligibility</label>
+                                                        <input type="file" id="eligibility" name="eligibility" class="form-control">
+                                                        @if (!is_null($requirement->eligibility))
+                                                        <p class="text-muted">View Existing Document
+                                                            <a href="{{ asset('storage/requirements/'. $requirement->eligibility) }}" target="_blank" class="text-sm">View</a>
+                                                        </p>
+                                                        @endif
+                                                    </div>
+                                                @endforeach
+                                                <div class="mb-3 mx-4 text-end">
+                                                    <button type="submit" name="upload" class="btn btn-primary">Upload</button>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                         <div class="col-md-12 border-top border-bottom mb-3">
                             <div class="accordion my-3" id="requirementsAccordion">
                                 @foreach ($requirements as $requirement)

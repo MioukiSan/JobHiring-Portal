@@ -18,9 +18,8 @@ return new class extends Migration
             $table->string('usertype')->default('user');
             $table->bigInteger('number')->nullable();
             $table->string('address')->nullable();  
-            $table->string('currentwork')->nullable();
-            $table->string('title')->nullable();
-            $table->timestamp('email_verified_at')->nullable();
+            $table->string('account_status')->nullable();
+            $table->timestamp('acc_verified_at')->nullable();
             $table->string('password');
             $table->rememberToken();
             $table->timestamps();

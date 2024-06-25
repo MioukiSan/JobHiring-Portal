@@ -52,8 +52,8 @@ class ProfileController extends Controller
 
         $user = User::find(Auth::user()->id);
 
-        if($code === $user->title){
-            $user->title = 'verified';
+        if($code === $user->account_status){
+            $user->account_status = 'verified';
             $user->save();
             return back()->with('success', 'Your account is verified.');
         }else{
@@ -91,7 +91,7 @@ class ProfileController extends Controller
         $output = curl_exec( $ch );
         curl_close ($ch);
 
-        $user->title = $code;
+        $user->account_status = $code;
 
         $user->save();
         return back()->with('info', 'Verification code is already sent to your number. Please check your inbox. Thank you!!!');
@@ -202,6 +202,22 @@ class ProfileController extends Controller
         
         return response()->json($events->values());
     }
+
+    
+    public function update(Request $request)
+    {
+        $user = User::find(Auth::id());
+        $validatedData = $request->validate([
+            'name' => 'required|max:255',
+            'email' => 'required|email',
+            'number' => 'required|max:11',
+            'address' => 'required|max:255',
+        ]);
+
+        $user->update($validatedData);
+        
+        return redirect()->back()->with('success', 'Profile updated successfully');
+    }
     
     public function create()
     {
@@ -235,9 +251,5 @@ class ProfileController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, User $user)
-    {
-        //
-    }
 
 }

@@ -28,7 +28,7 @@
                                 @if (is_null($requirement->training_cert))
                                     <div class="m-3">
                                         <label for="training_cert" class="form-label">Training Certificate</label>
-                                        <input type="file" id="training_cert" name="training_cert" class="form-control" required>
+                                        <input type="file" id="training_cert" name="training_cert" class="form-control">
                                     </div>
                                 @endif
                                 @if (is_null($requirement->eligibility))
