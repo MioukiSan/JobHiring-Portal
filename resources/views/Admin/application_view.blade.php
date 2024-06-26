@@ -34,11 +34,6 @@
                         </div>
                     @endif
                     <div class="card-header">Hiring & Applicants Details
-                    {{-- @if ($hiring_status === 'BEI' && Auth::user()->usertype === 'hr')
-                    <div class="card-tools">
-                        <a href="" class="btn btn-primary btn-float-end btn-sm" title="Click to add BEI rating for Applicants.">Behavioral Event Interview</a>
-                    </div>
-                    @else --}}
                     @if ($hiring_status === 'Closed' && Auth::user()->usertype === 'hr')
                     <div class="card-tools">
                         <x-adminlte-button class="btn-sm" label="Click to View" data-toggle="modal" data-target="#SelectApplicants" />
@@ -46,9 +41,6 @@
                             <div class="row">
                                 <div class="col-12">
                                     <div class="modal-body">
-                                        {{-- <div class="alert alert-info">
-                                            If you are now selecting applicants to go on to the next stage, it confirms that you have already read the documents of each applicant.
-                                        </div> --}}
                                         <small>
                                             Instruction: Check the box if the applicant passed the Phase 1 shortlisting.
                                         </small>

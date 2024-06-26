@@ -77,7 +77,7 @@
                                       <select class="form-control" id="salary_grade" name="salary_grade" required>
                                         <option value="" disabled selected>Select salary grade</option>
                                         <?php 
-                                          for($id = 1; $id <= 10; $id++) {
+                                          for($id = 1; $id <= 24; $id++) {
                                             echo "<option value='$id'>$id</option>";
                                           }
                                         ?>

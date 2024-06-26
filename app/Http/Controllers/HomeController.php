@@ -17,37 +17,50 @@ class HomeController extends Controller
 {
     public function index(Request $request)
     {
-        $querySearch = '';
-        if($request->has('filter')){
-            $filter = $request->filter;
-        } else {
-            $filter = '';
+        $filter = '';
+        $querySearch = $request->querySearch;
+
+        // Base query for hirings
+        $hiringQuery = Hiring::where('job_status', 'Open');
+
+        // If there is a search query, add conditions to the query
+        if (!empty($querySearch)) {
+            $hiringQuery->where(function($query) use ($querySearch) {
+                $query->where('job_position', 'LIKE', '%' . $querySearch . '%')
+                    ->orWhere('department', 'LIKE', '%' . $querySearch . '%');
+            });
         }
-        if (Auth::check()) { 
-            // If the user is authenticated
+
+        // If there is a filter, add it to the query
+        if (!empty($request->filter)) {
+            $filter = $request->filter;
+            $hiringQuery->where('contract_type', $filter);
+        }
+
+        // Get paginated results
+        $hirings = $hiringQuery->paginate(5);
+
+        // If no results, fallback to the default query
+        if ($hirings->count() == 0) {
+            $hiringQuery = Hiring::where('job_status', 'Open');
+
+            if (!empty($request->filter)) {
+                $hiringQuery->where('contract_type', $filter);
+            }
+
+            $hirings = $hiringQuery->paginate(5);
+        }
+
+        // If the user is authenticated
+        if (Auth::check()) {
             $user = Auth::user();
             $requirements = Requirement::where('user_id', $user->id)->get();
-            
-            if ($request->has('querySearch')) {
-                $querySearch = $request->querySearch;
-                $hirings = Hiring::where(function($query) use ($querySearch) {
-                                    $query->where('job_position', 'LIKE', '%'. $querySearch. '%')
-                                          ->orWhere('department', 'LIKE', '%'. $querySearch. '%');
-                                })
-                                ->where('job_status', 'Open')
-                                ->paginate(5);
-                if($hirings->count() == 0) {
-                    $hirings = Hiring::where('job_status', 'Open')->paginate(5);
-                }
-            } else {
-                $hirings = Hiring::where('job_status', 'Open')->paginate(5);
-            }   
-            
+
             // Check if the user has an ongoing application for each hiring job
             foreach ($hirings as $hiring) {
                 $applicant = Applicant::where('user_id', $user->id)
                                     ->where('hiring_id', $hiring->id)
-                                    ->first(); // Retrieve the first matching applicant
+                                    ->first();
 
                 // If an applicant is found, set the hasApplication flag and retrieve the application_status
                 if ($applicant) {
@@ -55,7 +68,7 @@ class HomeController extends Controller
                     $hiring->application_status = $applicant->application_status;
                 } else {
                     $hiring->hasApplication = false;
-                    $hiring->application_status = null; // Set to null if no applicant found
+                    $hiring->application_status = null;
                 }
             }
 
@@ -71,27 +84,26 @@ class HomeController extends Controller
                 case 'hr':
                     return redirect()->route('admin')->with("success", "You are logged in");
                 default:
-                    return view('Home', ['hirings' => $hirings, 'requirements' => $requirements, 'home' => 'home']);
+                    $data = [
+                        'hirings' => $hirings,
+                        'requirements' => $requirements,
+                        'filter' => $filter,
+                        'search' => $querySearch,
+                    ];
+                    return view('Home', $data);
             }
         } else {
-            if ($request->has('querySearch')) {
-                $querySearch = $request->querySearch;
-                $hirings = Hiring::where(function($query) use ($querySearch) {
-                                    $query->where('job_position', 'LIKE', '%'. $querySearch. '%')
-                                          ->orWhere('department', 'LIKE', '%'. $querySearch. '%');
-                                })
-                                ->where('job_status', 'Open')
-                                ->paginate(5);
-                if($hirings->count() == 0) {
-                    $hirings = Hiring::where('job_status', 'Open')->paginate(5);
-                }
-            } else {
-                $hirings = Hiring::where('job_status', 'Open')->paginate(5);
-            }
-            
-            return view('Home', ['hirings' => $hirings, 'home' => 'home']);            
+            // If the user is not authenticated
+            $data = [
+                'hirings' => $hirings,
+                'filter' => $filter,
+                'search' => $querySearch,
+            ];
+
+            return view('Home', $data);
         }
     }
+
     
     //Login form
     public function loginPost(Request $request) {

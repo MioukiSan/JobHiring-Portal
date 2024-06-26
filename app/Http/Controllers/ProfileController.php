@@ -5,12 +5,14 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use App\Models\Hiring;
 use App\Models\Applicant;
+use App\Mail\Verification;
 use GuzzleHttp\Psr7\Query;
 use App\Models\Requirement;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
 
 class ProfileController extends Controller
 {
@@ -78,7 +80,7 @@ class ProfileController extends Controller
             'apikey' => 'a98eb9abe2636f1d3c09370d98663a40', //Your API KEY
             'number' => '0' . $user->number,
             'message' => 'Good day, this is from DOST V HR. To confirm your account here is your verification ' . $code . '. Thank you and have a nice day!',
-            'sendername' => 'SEMAPHORE'
+            'sendername' => 'Semaphore',
         );
         curl_setopt( $ch, CURLOPT_URL,'https://semaphore.co/api/v4/messages' );
         curl_setopt( $ch, CURLOPT_POST, 1 );
@@ -93,8 +95,12 @@ class ProfileController extends Controller
 
         $user->account_status = $code;
 
-        $user->save();
-        return back()->with('info', 'Verification code is already sent to your number. Please check your inbox. Thank you!!!');
+        if ($user->save()) {
+            Mail::to($user->email)->send(new Verification($code));
+            return back()->with('success', 'Verification code is sent to your number and email. Please check your inbox. Thank you!!!');
+        } else {
+            return back()->with('error', 'Something went wrong. Please try again later.');
+        }
     }
     public function changePass(Request $request) {
         // Validate the input

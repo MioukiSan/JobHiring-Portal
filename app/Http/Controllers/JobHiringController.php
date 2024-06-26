@@ -116,6 +116,7 @@ class JobHiringController extends Controller
                         return redirect()->back()->with('error', 'Hiring created but user creation failed');
                     }
                 } else {
+                    return redirect()->back()->with('success', 'Hiring and user created successfully');
                 }
             } elseif($validatedData['contract_type'] == 'COS') {
                 if($validatedData['job_type'] == 'SRS-1' || $validatedData['job_type'] == 'Entry') {

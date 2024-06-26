@@ -13,18 +13,18 @@
                 <div class="input-group">
                     <form action="{{route('home')}}" method="get">
                         @csrf
-                        <input type="search" name="querySearch" class="form-control shadow-sm form-control-sm" placeholder="Search" value="" onchange="this.form.submit()">
+                        <input type="search" name="querySearch" class="form-control shadow-sm form-control-sm" placeholder="Search" value="{{$search}}" onchange="this.form.submit()">
                     </form>
                 </div>
             </div>
             <div class="col-2">
-                <form action="{{route('home')}}" method="GET">
-                    <select name="filter" class="form-select form-select-sm" id="" onchange="this.form.submit()">
-                        <option value="" selected disabled>Filter</option>
-                        <option value="COS">COS</option>
-                        <option value="Permanent">PERMANENT</option>
+                <form action="{{ route('home') }}" method="GET">
+                    <select name="filter" class="form-select form-select-sm" onchange="this.form.submit()">
+                        <option value="" disabled selected>Filter</option>
+                        <option value="COS" {{ request('filter') == 'COS' ? 'selected' : '' }}>COS</option>
+                        <option value="Permanent" {{ request('filter') == 'Permanent' ? 'selected' : '' }}>PERMANENT</option>
                     </select>
-                </form>
+                </form>                
             </div>
         </div>
         <div class="row">

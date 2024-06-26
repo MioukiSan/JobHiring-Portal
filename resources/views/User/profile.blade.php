@@ -31,7 +31,7 @@
                             <p class="mt-3"><b>Account Status: </b>
                                 @if (Auth::user()->account_status === NULL)
                                     <span class="text-warning">Not verfiied<ion-icon name="alert-circle-outline"></ion-icon></span><a href="{{route('send.verification')}}">  verify now</a></p>
-                                @elseif (Auth::user()->account_status != NULL && Auth::user()->title != 'verified')
+                                @elseif (Auth::user()->account_status != NULL && Auth::user()->account_status != 'verified')
                                     <span class="text-warning">Verification in Process<ion-icon name="footsteps-outline"></ion-icon></span>
                                         <button class="btn btn-sm" title="Click to enter the code sent to your number." data-bs-toggle="modal" data-bs-target="#verify">Enter Code</button>
                                         <div class="modal fade" id="verify"  tabindex="-1" aria-labelledby="verifyLabel" aria-hidden="true">
@@ -44,10 +44,11 @@
                                                     <form action="{{route('verify.account')}}" method="POST">
                                                         @csrf
                                                         <div class="modal-body">
-                                                            <div class="form-group">
+                                                            <div class="form-group mb-2">
                                                                 <label for="verification_code" class="form-label">Verification Code</label>
                                                                 <input type="text" name="verification_code" placeholder="Enter the verification code." class="form-control" required>
                                                             </div>
+                                                            <a class="muted" href="{{route('send.verification')}}">Resend code?</a>
                                                         </div>
                                                         <div class="modal-footer">
                                                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
