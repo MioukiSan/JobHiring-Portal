@@ -41,9 +41,9 @@
                                     <div class="row">
                                         <div class="col-6">
                                             <p><b>COMPETENCY EXAM DATE: </b></p>
-                                            <p><b>PRE-EMPLOYMENT DATE: {{$employment_date}}</b></p>
-                                            <p><b>INITIAL INTERVIEW DATE {{$initial_date}}</b></p>
-                                            <p><b>FINAL INTERVIEW DATE: {{$final_date}}</b></p>
+                                            <p><b>PRE-EMPLOYMENT DATE: </b></p>
+                                            <p><b>INITIAL INTERVIEW DATE </b></p>
+                                            <p><b>FINAL INTERVIEW DATE: </b></p>
                                         </div>
                                         <div class="col-6">
                                             <p>{{$competency_date}}</p>
@@ -106,11 +106,51 @@
                                                                     {{ $applicant['initial_result'] }}
                                                                 </p>
                                                             @endif
-                                                                @if ($applicant['applicantId'] != NULL)
+                                                            @if ($applicant['applicantId'] != NULL)
                                                                 <a class="btn" href="{{route('generateBEI', ['applicantID' => $applicant['applicant_id']])}}" target="_blank">View BEI</a>
                                                             @else
                                                                 <a href="{{ route('IndividualBEIGuest', ['applicantID' => $applicant['applicant_id']]) }}">Initial Interview</a>
                                                             @endif
+                                                        @endif
+                                                        @if ($applicant['applicantId'] != NULL)
+                                                                <a class="btn" href="{{route('generateBEI', ['applicantID' => $applicant['applicant_id']])}}" target="_blank">View BEI</a>
+                                                        @else
+                                                            <a href="{{ route('IndividualBEIGuest', ['applicantID' => $applicant['applicant_id']]) }}">Initial Interview</a>
+                                                        @endif
+                                                    @else
+                                                        @if (!empty($applicant['initial_result']))
+                                                            <p class="{{ $applicant['initial_result'] === 'Failed' ? 'text-danger' : ($applicant['initial_result'] === 'Passed' ? 'text-success' : '') }}">
+                                                                {{ $applicant['initial_result'] }}
+                                                            </p>
+                                                        @else
+                                                        <button class="btn" data-bs-toggle="modal" type="button" data-bs-target="#InitialModal">Update</button>
+                                                        <div class="modal fade" id="InitialModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                                                            <div class="modal-dialog modal-dialog-centered">
+                                                                <div class="modal-content">
+                                                                    <div class="modal-header">
+                                                                        <h5 class="modal-title" id="exampleModalLabel">Final Interview Result</h5>
+                                                                    </div>
+                                                                    <div class="modal-body">
+                                                                        <h6><b>NAME: </b>{{$applicant['user_name']}}</h6>
+                                                                        <form action="{{route('application.updateApplicant', ['for' => 'Initial Interview', 'applicant_id' => $applicant['applicant_id'], 'hiringID' =>$hiring_id])}}" method="POST">
+                                                                            @csrf
+                                                                            <div class="my-3">
+                                                                                <select class="form-control" name="InitialResult">Select Result
+                                                                                    <option value="Passed">Passed</option>
+                                                                                    <option value="Failed">Failed</option>
+                                                                                </select>
+                                                                            </div>
+                                                                            <div class="text-center">
+                                                                                <button type="submit" class="btn text-white" style="background-color:rgb(0, 0, 226)">Submit</button>
+                                                                            </div>
+                                                                        </form>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        @endif
+                                                        @if ($applicant['applicantId'] != NULL)
+                                                            <a class="btn" href="{{route('generateBEI', ['applicantID' => $applicant['applicant_id']])}}" target="_blank">View BEI</a>
                                                         @endif
                                                     @endif
                                                 </td>                                                  

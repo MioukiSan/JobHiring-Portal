@@ -79,9 +79,9 @@
       </div>
     </div>
   </div>
-  @elseif ($hiring_status == 'Pre-Employment Exam' && $date === $competency_date)
+  @elseif ($hiring_status == 'Pre-Employment Exam' && $date === $employment_date)
   <button type="button" class="btn text-light btn-sm float-end" class="btn btn-sm text-light float-end" style="background-color: #000789;"  data-bs-toggle="modal" data-bs-target="#shortlistingModal" title="Confirm and Reject Applicants">
-    Final Shortlist Applicants
+    Final Shortlist Applicants 
   </button>
   <div class="modal fade" id="shortlistingModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">

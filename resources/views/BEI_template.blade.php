@@ -40,7 +40,14 @@
                                 <p>Interviewee Name: <span style="text-decoration: underline">{{$name}}</span></p>
                             </td>
                             <td><p>Position Applied for: <span style="text-decoration: underline;">{{$position}}</span></p></td>
-                            <td><p>Date: <span style="text-decoration: underline;">{{$beiDate}}</span></p></td>
+                            <td><p>Date: <span style="text-decoration: underline;">
+                                {{$beiDate}}
+                            @if ($jobType === 'Permanent')
+                                {{$beiDate}}
+                            @else
+                                {{$initialInterview}}
+                            @endif
+                            </span></p></td>
                         </tr>
                     </tbody>
                 </table>

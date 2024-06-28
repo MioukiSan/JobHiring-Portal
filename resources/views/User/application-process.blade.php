@@ -10,7 +10,7 @@
                         <h1><b>{{$hiring->job_position}}</b></h1>
                     </div>
                     <div class="col-md-5">
-                        @if (Auth::user()->title === 'Verified')
+                        @if (Auth::user()->account_status === 'verified')
                             <a href="{{route('application.applyUpload', [ 'hiringID' => $hiring->id ])}}" class="btn text-light float-end" style="background-color: #000789;">Apply</a>
                         @else
                             <button class="btn text-light float-end" style="background-color: #000789;" type="button" data-bs-toggle="modal" data-bs-target="#verifyAccount">Apply</button>

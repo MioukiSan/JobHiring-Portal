@@ -363,6 +363,7 @@ class ApplicationController extends Controller
                 ->where('id', $ApplicantID)
                 ->update([
                     'initial_interview' => $request->InitialResult,
+                    'initial_interview_result' => $request->InitialResult,
                 ]);
     
             if($affected){
@@ -650,7 +651,7 @@ class ApplicationController extends Controller
                 'management' => $request->management_rate.','. $request->management_situation. ','. $request->management_action. ','. $request->management_result,
                 'staff_management' => $request->staff_management_rate.','. $request->staff_management_situation. ','. $request->staff_management_action. ','. $request->staff_management_result,
                 'org_awareness' => $request->org_awareness_rate.','. $request->org_awareness_situation. ','. $request->org_awareness_action. ','. $request->org_awareness_result,
-                'stategic_planning' => $request->stategic_planning_rate.','. $request->stategic_planning_situation. ','. $request->stategic_planning_action. ','. $request->stategic_planning_result,
+                'strategic_planning' => $request->strategic_planning_rate.','. $request->strategic_planning_situation. ','. $request->strategic_planning_action. ','. $request->strategic_planning_result,
                 'monitor_evaluation' => $request->monitor_evaluation_rate.','. $request->monitor_evaluation_situation. ','. $request->monitor_evaluation_action. ','. $request->monitor_evaluation_result,
                 'planning' => $request->planning_rate.','. $request->planning_situation. ','. $request->planning_action. ','. $request->planning_result,
                 'service_delivery' => $request->service_delivery_rate.','. $request->service_delivery_situation. ','. $request->service_delivery_action. ','. $request->service_delivery_result,
@@ -680,7 +681,7 @@ class ApplicationController extends Controller
         $usertype = Auth::user()->usertype;
 
         if ($usertype == 'admin' || $usertype == 'hr') {
-            $beiData = SalaryGrade::select('s.*', 'h.job_position', 'h.bei_date', 'u.name', 'a.id')
+            $beiData = SalaryGrade::select('s.*', 'h.job_type', 'h.job_position', 'h.initial_interview_date', 'h.bei_date', 'u.name', 'a.id')
             ->from('salary_grades as s')
             ->leftJoin('applicants as a', 'a.id', '=', 's.applicant_id')
             ->leftJoin('users as u', 'u.id', '=', 'a.user_id')
@@ -688,7 +689,7 @@ class ApplicationController extends Controller
             ->where('applicant_id', $request->applicantID)
             ->get();// Assuming only one applicant
         } else {
-            $beiData = SalaryGrade::select('s.*', 'h.job_position', 'h.bei_date', 'u.name', 'a.id')
+            $beiData = SalaryGrade::select('s.*', 'h.job_type', 'h.job_position','h.initial_interview_date', 'h.bei_date', 'u.name', 'a.id')
                 ->from('salary_grades as s')
                 ->leftJoin('applicants as a', 'a.id', '=', 's.applicant_id')
                 ->leftJoin('users as u', 'u.id', '=', 'a.user_id')
@@ -758,11 +759,15 @@ class ApplicationController extends Controller
             $name = $item->name;
             $jobPosition = $item->job_position;
             $beiDate = $item->bei_date;
+            $initial_interview = $item->initial_interview_date;
+            $jobType = $item->job_type;
         }
         $data = [
             'name' => $name,
             'position' => $jobPosition,
             'beiDate' => $beiDate,
+            'initialInterview' => $initial_interview,
+            'jobType' => $jobType,
             'beiDatas' => $allCompetencies,
         ];
 

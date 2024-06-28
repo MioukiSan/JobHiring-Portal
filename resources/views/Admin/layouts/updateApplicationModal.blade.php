@@ -196,7 +196,7 @@
                                             </div>
                                         </div>
                                     @else
-                                    <form action="{{route('application.updateApplicant', ['for' => 'Intial Interview', 'applicant_id' => $applicant['applicant_id']])}}" method="POST" enctype="multipart/form-data">
+                                    <form action="{{route('application.updateApplicant', ['for' => 'Initial Interview', 'applicant_id' => $applicant['applicant_id']])}}" method="POST" enctype="multipart/form-data">
                                             @csrf
                                             <div class="form-group">
                                                 <label for="InitialResult" class="form-label">Exam Result</label>

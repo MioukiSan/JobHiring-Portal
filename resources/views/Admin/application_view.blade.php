@@ -34,9 +34,9 @@
                         </div>
                     @endif
                     <div class="card-header">Hiring & Applicants Details
-                    @if ($hiring_status === 'Closed' && Auth::user()->usertype === 'hr')
+                    @if ($hiring_status === 'Closed' && Auth::user()->usertype === 'hr' && $job_type == "SRS-2")
                     <div class="card-tools">
-                        <x-adminlte-button class="btn-sm" label="Click to View" data-toggle="modal" data-target="#SelectApplicants" />
+                        <x-adminlte-button class="btn-sm" label="Shortlist Applicant" data-toggle="modal" data-target="#SelectApplicants" />
                         <x-adminlte-modal id="SelectApplicants" title="Select Applicants" v-centered>
                             <div class="row">
                                 <div class="col-12">

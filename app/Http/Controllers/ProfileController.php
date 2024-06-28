@@ -27,7 +27,6 @@ class ProfileController extends Controller
             ->leftJoin('hirings', 'hirings.id', '=', 'applicants.hiring_id')
             ->where('applicants.user_id', $user)
             ->where('hirings.job_status', '!=', 'Archived')
-            ->where('applicants.application_status', '=', 'Passed')
             ->orderBy('applicants.created_at', 'asc')
             ->get();
 
@@ -149,7 +148,8 @@ class ProfileController extends Controller
             'h.initial_interview_date', 
             'h.final_interview_date', 
             'h.psycho_test_date', 
-            'h.closing'
+            'h.bei_date',
+            
         )
         ->leftJoin('hirings as h', 'h.id', '=', 'applicants.hiring_id')
         ->where('applicants.user_id', $id)
