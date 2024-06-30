@@ -681,7 +681,7 @@ class ApplicationController extends Controller
         $usertype = Auth::user()->usertype;
 
         if ($usertype == 'admin' || $usertype == 'hr') {
-            $beiData = SalaryGrade::select('s.*', 'h.job_type', 'h.job_position', 'h.initial_interview_date', 'h.bei_date', 'u.name', 'a.id')
+            $beiData = SalaryGrade::select('s.*', 'h.contract_type', 'h.job_position', 'h.initial_interview_date', 'h.bei_date', 'u.name', 'a.id')
             ->from('salary_grades as s')
             ->leftJoin('applicants as a', 'a.id', '=', 's.applicant_id')
             ->leftJoin('users as u', 'u.id', '=', 'a.user_id')
@@ -689,7 +689,7 @@ class ApplicationController extends Controller
             ->where('applicant_id', $request->applicantID)
             ->get();// Assuming only one applicant
         } else {
-            $beiData = SalaryGrade::select('s.*', 'h.job_type', 'h.job_position','h.initial_interview_date', 'h.bei_date', 'u.name', 'a.id')
+            $beiData = SalaryGrade::select('s.*', 'h.contract_type', 'h.job_position','h.initial_interview_date', 'h.bei_date', 'u.name', 'a.id')
                 ->from('salary_grades as s')
                 ->leftJoin('applicants as a', 'a.id', '=', 's.applicant_id')
                 ->leftJoin('users as u', 'u.id', '=', 'a.user_id')
@@ -760,14 +760,14 @@ class ApplicationController extends Controller
             $jobPosition = $item->job_position;
             $beiDate = $item->bei_date;
             $initial_interview = $item->initial_interview_date;
-            $jobType = $item->job_type;
+            $contractType = $item->contract_type;
         }
         $data = [
             'name' => $name,
             'position' => $jobPosition,
             'beiDate' => $beiDate,
             'initialInterview' => $initial_interview,
-            'jobType' => $jobType,
+            'contractType' => $contractType,
             'beiDatas' => $allCompetencies,
         ];
 

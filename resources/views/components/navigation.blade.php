@@ -54,6 +54,20 @@
                             </div>
                         </li>
                         @elseif (Auth::user()->usertype == 'guest')
+                        <li class="nav-item dropdown" id="dropdownNotif">
+                            <a href="#" class="nav-link position-relative" id="dropdown-notif" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" v-pre>
+                                <ion-icon name="notifications" size="large" style="color: #000789;"></ion-icon>
+                                <span class="position-absolute top-6 start-80 translate-middle badge rounded-pill bg-light text-dark shadow border-2" id="unread-count">
+                                    0
+                                    <span class="visually-hidden">unread messages</span>
+                                </span>
+                            </a>
+                            <div class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdown-notif" id="notifications-menu">
+                                <p>
+                                    
+                                </p>
+                            </div>
+                        </li>
                         <li class="nav-item">
                             <button class="btn btn-link nav-link" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
                                 {{ __('Logout') }}

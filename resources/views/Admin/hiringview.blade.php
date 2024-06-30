@@ -175,7 +175,7 @@
                                             <x-adminlte-input name="bei_date" label="BEI Date" type="date" value="{{$hiring->bei_date}}" />
                                         </div>
                                         <div class="col-6">
-                                            <x-adminlte-input name="pyscho_test_date" label="Psychometric Test Date" type="date" value="{{$hiring->psycho_test_date}}"/>
+                                            <x-adminlte-input name="psycho_test_date" label="Psychometric Test Date" type="date" value="{{$hiring->psycho_test_date}}"/>
                                         </div>
                                         <div class="col-6">
                                             <x-adminlte-input name="final_interview_date" label="Final Interview Date" type="date" value="{{$hiring->final_interview_date}}" />

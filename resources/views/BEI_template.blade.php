@@ -42,7 +42,7 @@
                             <td><p>Position Applied for: <span style="text-decoration: underline;">{{$position}}</span></p></td>
                             <td><p>Date: <span style="text-decoration: underline;">
                                 {{$beiDate}}
-                            @if ($jobType === 'Permanent')
+                            @if ($contractType === 'Permanent')
                                 {{$beiDate}}
                             @else
                                 {{$initialInterview}}

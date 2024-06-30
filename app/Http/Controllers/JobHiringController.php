@@ -219,8 +219,8 @@ class JobHiringController extends Controller
             'pre_employment_exam_date' => 'Pre-employment Exam Date',
             'initial_interview_date' => 'Initial Interview Date',
             'final_interview_date' => 'Final Interview Date',
-            'bei_date' => 'BEI Date',
-            'psycho_test_date' => 'Psycho Test Date'
+            'bei_date' => 'Behavioral Evaluation Interview Date',
+            'psycho_test_date' => 'Psychological Test Date',
         ];
         
         foreach ($dateFields as $field => $fieldName) {
@@ -232,11 +232,34 @@ class JobHiringController extends Controller
                     $message = "The {$fieldName} for {$hiring->job_position} has been updated to " . Carbon::parse($request->$field)->format('Y-m-d'). ". Please save the date.";
                     Notification::create([
                         'sender_id' => NULL,
-                        'receiver_id' => $applicant->id,
+                        'receiver_id' => $applicant->user_id,
                         'message' => $message,
                         'status' => 'unread',
                         'type' => 'update',
                     ]);
+                }
+                if($hiring->contract_type == 'COS'){
+                    $guest = User::where('name', $hiring->reference)->first();
+                    $message = "The {$fieldName} for {$hiring->job_position} has been updated to " . Carbon::parse($request->$field)->format('Y-m-d'). ". Please save the date.";
+                    Notification::create([
+                        'sender_id' => NULL,
+                        'receiver_id' => $guest->id,
+                        'message' => $message,
+                        'status' => 'unread',
+                        'type' => 'update',
+                    ]);
+                }elseif($hiring->contract_type == 'Permanent'){
+                    $selectionBoard = User::where('usertype', 'selection board')->get();
+                    foreach($selectionBoard as $board){
+                        $message = "The {$fieldName} for {$hiring->job_position} has been updated to " . Carbon::parse($request->$field)->format('Y-m-d'). ". Please save the date.";
+                        Notification::create([
+                            'sender_id' => NULL,
+                            'receiver_id' => $board->id,
+                            'message' => $message,
+                            'status' => 'unread',
+                            'type' => 'update',
+                        ]);
+                    }
                 }
             }
         }

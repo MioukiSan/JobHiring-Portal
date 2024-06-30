@@ -10,11 +10,16 @@ class NotificationController extends Controller
 {
     public function getNotificationsData(Request $request)
     {
+        if (Auth::user()->usertype != 'hr' || Auth::user()->usertype != 'admin') {
+            $id = Auth::user()->id;
+        } else {
+            $id = 4506385;
+        }
         // Get all unread notifications for the current user.
         $notifications = Notification::where('receiver_id', 4506385)->orderBy('created_at', 'desc')->get();
         $countUnread = Notification::
             where('status', 'unread')
-            ->where('receiver_id', 4506385)
+            ->where('receiver_id', $id)
             ->count();
         // Initialize the dropdown content HTML.
         $dropdownHtml = '<form action="' . route('markAsRead') . '" method="POST" class="float-right">
